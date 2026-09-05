@@ -12,10 +12,15 @@ export const SIZE_SCALE = 1
 // [낙하 시작 높이] 병 맨 위에서 몇 px 아래에서 떨어뜨릴지
 export const SPAWN_Y = 44
 
-// [게임오버 라인] 병 맨 위에서 몇 px 아래인지. 이 선 위에 천체가 "멈춰서" 머물면 게임오버
+// [게임오버 라인] 병 맨 위에서 몇 px 아래인지
 export const GAME_OVER_LINE_Y = 120
-// 선 위에 얼마나 오래(ms) 머물러야 게임오버인지. 짧으면 억울한 게임오버가 늘어남
-export const GAME_OVER_HOLD_MS = 1500
+// 천체가 라인 위로 이 비율 이상 올라오면 "위험" 상태
+//   0.5 = 절반(중심)이 라인 위 / 0.3 = 조금만 걸쳐도 위험(더 어려움) / 0.8 = 거의 다 올라와야 함(더 쉬움)
+export const GAME_OVER_OVERLAP = 0.5
+// 위험 상태가 이만큼(ms) 이어지면 게임오버. 짧을수록 엄격함
+export const GAME_OVER_HOLD_MS = 1000
+// 방금 떨어뜨린 천체가 라인을 통과하는 동안은 판정에서 제외 (ms)
+export const SPAWN_GRACE_MS = 1200
 
 // [연속 낙하 제한] 한 번 떨어뜨린 뒤 다음 낙하까지 기다리는 시간(ms)
 export const DROP_COOLDOWN_MS = 450

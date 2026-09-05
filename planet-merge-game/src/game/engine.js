@@ -13,7 +13,9 @@ import {
   SIZE_SCALE,
   SPAWN_Y,
   GAME_OVER_LINE_Y,
+  GAME_OVER_OVERLAP,
   GAME_OVER_HOLD_MS,
+  SPAWN_GRACE_MS,
   DROP_COOLDOWN_MS,
   SPAWN_POOL_SIZE,
   GRAVITY_Y,
@@ -64,6 +66,8 @@ function createStageBody(stage, x, y, expression = 'normal') {
     },
   })
   body.gameStage = stage
+  body.spawnedAt = null // 첫 프레임에 기록 (게임오버 판정의 유예 시간 계산용)
+  body.countsForGameOver = false
   body.face = {
     current: expression,
     idle: 'normal',
@@ -124,6 +128,7 @@ export function createGame(
   let isPaused = false
   let isGameOver = false
   let violationStartedAt = null
+  let dangerRatio = 0 // 0 = 안전, 1 = 게임오버 직전 (경고선 표시용)
 
   const engine = Engine.create()
   engine.gravity.y = GRAVITY_Y
@@ -321,32 +326,56 @@ export function createGame(
 
   Events.on(engine, 'collisionStart', handleCollisionStart)
 
+  // 천체가 라인 위로 GAME_OVER_OVERLAP 비율 이상 올라왔는지 (0.5 = 중심이 라인 위)
+  function isOverLine(body) {
+    const top = body.position.y - body.circleRadius
+    const heightAboveLine = GAME_OVER_LINE_Y - top
+    return heightAboveLine >= body.circleRadius * 2 * GAME_OVER_OVERLAP
+  }
+
+  // 방금 떨어뜨려 라인을 통과 중인 천체는 제외.
+  // 한 번이라도 라인 아래로 내려갔거나, 떨어뜨린 지 충분히 지난 천체만 판정 대상.
+  function countsForGameOver(body, now) {
+    if (body.spawnedAt === null) body.spawnedAt = now
+    if (body.countsForGameOver) return true
+    if (
+      body.position.y > GAME_OVER_LINE_Y ||
+      now - body.spawnedAt > SPAWN_GRACE_MS
+    ) {
+      body.countsForGameOver = true
+    }
+    return body.countsForGameOver
+  }
+
   // ---------- 매 프레임: 표정 갱신 + 게임오버 판정 ----------
   function handleAfterUpdate() {
     if (isGameOver) return
 
     const now = engine.timing.timestamp
+    let inDanger = false
+
     for (const b of engine.world.bodies) {
-      if (!b.isStatic && b.face) updateExpression(b, now)
+      if (b.isStatic || !b.face) continue
+      updateExpression(b, now)
+      if (!inDanger && countsForGameOver(b, now) && isOverLine(b)) {
+        inDanger = true
+      }
     }
 
-    const settled = engine.world.bodies.filter(
-      (b) => !b.isStatic && b.speed < 0.5
-    )
-    const overLine = settled.some(
-      (b) => b.position.y - b.circleRadius < GAME_OVER_LINE_Y
-    )
-
-    if (overLine) {
+    if (inDanger) {
       if (violationStartedAt === null) {
         violationStartedAt = now
       } else if (now - violationStartedAt > GAME_OVER_HOLD_MS) {
         isGameOver = true
+        dangerRatio = 0
         Runner.stop(runner)
         onGameOver?.()
+        return
       }
+      dangerRatio = Math.min((now - violationStartedAt) / GAME_OVER_HOLD_MS, 1)
     } else {
       violationStartedAt = null
+      dangerRatio = 0
     }
   }
 
@@ -382,18 +411,56 @@ export function createGame(
     }
   }
 
-  function handleAfterRender() {
-    const ctx = render.context
+  // 게임오버 라인 — 위험 상태면 굵고 밝게 깜빡이며 "위험!" 표시
+  function drawGameOverLine(ctx) {
+    const danger = dangerRatio > 0
+    const blink = danger
+      ? 0.55 + 0.45 * Math.sin(engine.timing.timestamp / 90)
+      : 1
+
     ctx.save()
-    ctx.strokeStyle = 'rgba(255, 120, 140, 0.55)'
-    ctx.setLineDash([8, 8])
-    ctx.lineWidth = 2
+    if (danger) {
+      ctx.strokeStyle = `rgba(255, 70, 90, ${0.75 + 0.25 * blink})`
+      ctx.lineWidth = 4
+      ctx.setLineDash([])
+      ctx.shadowColor = 'rgba(255, 70, 90, 0.9)'
+      ctx.shadowBlur = 12
+    } else {
+      ctx.strokeStyle = 'rgba(255, 120, 140, 0.55)'
+      ctx.lineWidth = 2
+      ctx.setLineDash([8, 8])
+    }
     ctx.beginPath()
     ctx.moveTo(0, GAME_OVER_LINE_Y)
     ctx.lineTo(width, GAME_OVER_LINE_Y)
     ctx.stroke()
     ctx.restore()
 
+    if (!danger) return
+
+    // 남은 시간 게이지
+    ctx.save()
+    ctx.fillStyle = 'rgba(255, 70, 90, 0.85)'
+    ctx.fillRect(0, GAME_OVER_LINE_Y - 3, width * dangerRatio, 3)
+    ctx.restore()
+
+    // 경고 문구
+    ctx.save()
+    ctx.globalAlpha = 0.6 + 0.4 * blink
+    ctx.font = 'bold 20px system-ui, sans-serif'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'bottom'
+    ctx.lineWidth = 4
+    ctx.strokeStyle = 'rgba(20, 10, 20, 0.9)'
+    ctx.strokeText('위험!', width / 2, GAME_OVER_LINE_Y - 10)
+    ctx.fillStyle = '#ff5a6e'
+    ctx.fillText('위험!', width / 2, GAME_OVER_LINE_Y - 10)
+    ctx.restore()
+  }
+
+  function handleAfterRender() {
+    const ctx = render.context
+    drawGameOverLine(ctx)
     drawAimPreview(ctx)
     drawParticles(ctx)
   }

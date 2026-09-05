@@ -16,8 +16,12 @@ function displaySize(radius) {
 function PlanetGuide({ maxStage = -1 }) {
   return (
     <aside className="card planet-guide">
-      <h2 className="guide-title">천체 순서</h2>
+      <h2 className="guide-title">크기 순서표</h2>
       <p className="guide-hint">같은 천체 2개 → 다음 천체</p>
+      <p className="guide-note">
+        실제 <strong>지름이 작은 것부터 큰 순서</strong>예요.
+        태양에서 가까운 순서(태양계 배열)가 아니에요!
+      </p>
       <ol className="guide-list">
         {STAGES.map((stage, index) => {
           const size = displaySize(stage.radius)
