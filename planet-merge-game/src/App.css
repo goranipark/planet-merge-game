@@ -1,10 +1,18 @@
 #game-page {
   position: relative;
   z-index: 1;
-  max-width: 560px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 24px 16px 48px;
   text-align: center;
+}
+
+/* 천체 순서표 + 병을 나란히 배치 */
+.play-area {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 14px;
 }
 
 .title-area h1 {
@@ -143,13 +151,17 @@
 }
 
 #game-container {
+  width: 100%;
   cursor: pointer;
   touch-action: none; /* 터치로 끌 때 화면이 스크롤되지 않게 */
   user-select: none;
 }
 
+/* 좁은 화면에서는 캔버스를 통째로 축소해서 병 전체가 보이게 함 */
 #game-container canvas {
   display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* ---------- 게임오버 모달 ---------- */
@@ -223,6 +235,126 @@
 .btn-primary:active {
   transform: translateY(3px);
   box-shadow: 0 1px 0 var(--outline);
+}
+
+/* ---------- 천체 순서표 ---------- */
+.planet-guide {
+  width: 152px;
+  flex: none;
+  padding: 12px 8px;
+  text-align: left;
+}
+
+.guide-title {
+  font-size: 16px;
+  color: var(--accent);
+  text-align: center;
+  text-shadow: 0 2px 0 var(--outline);
+}
+
+.guide-hint {
+  margin: 2px 0 8px;
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.guide-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.guide-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  border-radius: 8px;
+  opacity: 0.72;
+  transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+/* 이번 판에서 만들어 본 천체는 또렷하게 강조 */
+.guide-item.is-found {
+  opacity: 1;
+  background: rgba(255, 213, 79, 0.12);
+}
+
+.guide-num {
+  flex: none;
+  width: 16px;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: right;
+}
+
+.guide-icon {
+  flex: none;
+  width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.guide-icon img {
+  display: block;
+  object-fit: contain;
+}
+
+.guide-name {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* 화면이 좁으면 병 위쪽에 가로로 배치 */
+@media (max-width: 700px) {
+  .play-area {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .planet-guide {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px 10px;
+  }
+
+  .guide-hint {
+    margin-bottom: 6px;
+  }
+
+  .guide-list {
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .guide-item {
+    flex-direction: column;
+    gap: 2px;
+    flex: none;
+    width: 52px;
+    text-align: center;
+  }
+
+  .guide-num {
+    width: auto;
+    text-align: center;
+  }
+
+  .guide-name {
+    font-size: 10px;
+    white-space: normal;
+    word-break: keep-all;
+  }
 }
 
 /* ---------- 교육 정보 카드 ---------- */

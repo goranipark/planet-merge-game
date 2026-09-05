@@ -8,6 +8,8 @@ import {
   IDLE_EXPRESSIONS,
 } from './sprites'
 import {
+  CONTAINER_WIDTH,
+  CONTAINER_HEIGHT,
   SIZE_SCALE,
   SPAWN_Y,
   GAME_OVER_LINE_Y,
@@ -113,8 +115,10 @@ export function createGame(
   container,
   { onScoreChange, onNextChange, onGameOver, onSfx, onMerge } = {}
 ) {
-  const width = container.clientWidth
-  const height = container.clientHeight
+  // 물리 세계 크기는 항상 config 값으로 고정하고, 좁은 화면에서는 CSS가 캔버스를 축소해 보여줍니다.
+  // (화면 크기가 바뀌어도 게임이 초기화되지 않음)
+  const width = CONTAINER_WIDTH
+  const height = CONTAINER_HEIGHT
 
   let lastLandSfxAt = -Infinity
   let isPaused = false
@@ -185,9 +189,11 @@ export function createGame(
     onNextChange?.(nextStage)
   }
 
+  // 화면에 표시된 크기가 줄어들어 있어도 물리 좌표로 정확히 변환
   function pointerX(event) {
     const rect = container.getBoundingClientRect()
-    return event.clientX - rect.left
+    const scale = rect.width > 0 ? width / rect.width : 1
+    return (event.clientX - rect.left) * scale
   }
 
   function handlePointerMove(event) {

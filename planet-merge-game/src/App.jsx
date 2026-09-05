@@ -9,6 +9,7 @@ import NextPreview from './components/NextPreview'
 import GameOverModal from './components/GameOverModal'
 import MuteButton from './components/MuteButton'
 import InfoCard from './components/InfoCard'
+import PlanetGuide from './components/PlanetGuide'
 import './App.css'
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
   const [gameKey, setGameKey] = useState(0)
   const [muted, setMuted] = useState(false)
   const [cardQueue, setCardQueue] = useState([]) // 순서대로 보여줄 정보 카드(단계 번호)
+  const [maxStage, setMaxStage] = useState(-1) // 이번 판에서 만들어 본 가장 큰 천체
 
   // 오디오 매니저는 앱 전체에서 하나만 사용
   if (!audioRef.current) {
@@ -58,6 +60,7 @@ function App() {
     setScore(0)
     setIsGameOver(false)
     setCardQueue([])
+    setMaxStage(-1)
 
     const audio = audioRef.current
     const game = createGame(containerRef.current, {
@@ -74,6 +77,7 @@ function App() {
       onNextChange: (stage) => setNextStage(stage),
       onSfx: (name, detail) => audio.play(name, detail),
       onMerge: (stage) => {
+        setMaxStage((prev) => Math.max(prev, stage))
         // 처음 만든 천체면 게임을 멈추고 정보 카드 표시
         if (seenStagesRef.current.has(stage)) return
         seenStagesRef.current.add(stage)
@@ -120,31 +124,35 @@ function App() {
           <MuteButton muted={muted} onToggle={toggleMute} />
         </div>
 
-        <div
-          id="game-container-wrapper"
-          className="jar"
-          style={{ width: CONTAINER_WIDTH }}
-        >
+        <div className="play-area">
+          <PlanetGuide maxStage={maxStage} />
+
           <div
-            ref={containerRef}
-            id="game-container"
-            style={{ width: CONTAINER_WIDTH, height: CONTAINER_HEIGHT }}
-          />
-          {cardQueue.length > 0 && (
-            <InfoCard
-              key={cardQueue[0]}
-              stage={cardQueue[0]}
-              remaining={cardQueue.length - 1}
-              onClose={closeCard}
+            id="game-container-wrapper"
+            className="jar"
+            style={{ width: `min(${CONTAINER_WIDTH}px, 100%)` }}
+          >
+            <div
+              ref={containerRef}
+              id="game-container"
+              style={{ aspectRatio: `${CONTAINER_WIDTH} / ${CONTAINER_HEIGHT}` }}
             />
-          )}
-          {isGameOver && (
-            <GameOverModal
-              score={score}
-              best={best}
-              onRestart={() => setGameKey((k) => k + 1)}
-            />
-          )}
+            {cardQueue.length > 0 && (
+              <InfoCard
+                key={cardQueue[0]}
+                stage={cardQueue[0]}
+                remaining={cardQueue.length - 1}
+                onClose={closeCard}
+              />
+            )}
+            {isGameOver && (
+              <GameOverModal
+                score={score}
+                best={best}
+                onRestart={() => setGameKey((k) => k + 1)}
+              />
+            )}
+          </div>
         </div>
       </div>
     </>
