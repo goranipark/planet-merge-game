@@ -1,0 +1,61 @@
+/* design.md 가이드 기준: 다크 네이비 우주 배경, 별빛 옐로우 포인트, 둥근 카툰 폰트 */
+:root {
+  --bg: #0b0e1a;
+  --text: #f5f5f5;
+  --muted: #a8b0c8;
+  --accent: #ffd54f;
+  --accent-2: #ffb800;
+  --outline: #2b2340;
+  --card: rgba(255, 255, 255, 0.08);
+  --card-border: rgba(255, 255, 255, 0.16);
+  --font-body: 'Noto Sans KR', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  --font-display: 'Jua', 'BM Jua', 'Noto Sans KR', 'Malgun Gothic', system-ui, sans-serif;
+
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--text);
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 60% 45% at 15% 20%, rgba(124, 77, 255, 0.28), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 85% 75%, rgba(0, 200, 190, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 70% 15%, rgba(255, 105, 180, 0.14), transparent 70%),
+    linear-gradient(180deg, #0d1230 0%, #0b0e1a 55%, #060810 100%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+#root {
+  position: relative;
+  min-height: 100vh;
+}
+
+.space-stars {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}

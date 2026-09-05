@@ -1,0 +1,8 @@
+# 의존성 / 빌드 결과물 (GitHub Actions 가 서버에서 다시 만듭니다)
+planet-merge-game/node_modules
+planet-merge-game/dist
+
+# 로컬 도구 설정
+.claude/
+.DS_Store
+Thumbs.db

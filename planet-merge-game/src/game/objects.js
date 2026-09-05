@@ -1,0 +1,108 @@
+// concept.md 3장 — 11단계 병합 오브젝트 데이터
+// radius(px)는 실제 지름 비율이 아니라 게임 화면(병 너비 약 400px)에 맞춘 게임플레이용 값입니다.
+// 실제 지름은 diameterKm에 보관하고, 교육 모드 정보 카드에서 description/fact 와 함께 보여줍니다.
+// (대상: 초등 5~6학년, "태양계와 별" 단원)
+export const STAGES = [
+  {
+    id: 0,
+    name: '소행성',
+    diameterKm: 500,
+    radius: 18,
+    color: '#9e9e9e',
+    description: '태양 주위를 도는 작은 바위 덩어리예요.',
+    fact: '화성과 목성 사이에는 소행성이 아주 많이 모여 있는 "소행성대"가 있어요.',
+  },
+  {
+    id: 1,
+    name: '위성(달)',
+    diameterKm: 3474,
+    radius: 23,
+    color: '#cfd8dc',
+    description: '지구 주위를 도는 우리의 이웃, 달이에요.',
+    fact: '달에는 공기가 없어서 우주인의 발자국이 수백만 년 동안 그대로 남아요.',
+  },
+  {
+    id: 2,
+    name: '수성',
+    diameterKm: 4879,
+    radius: 28,
+    color: '#b0a89c',
+    description: '태양에 가장 가깝고, 태양계에서 가장 작은 행성이에요.',
+    fact: '낮에는 430℃까지 뜨겁고 밤에는 -180℃까지 차가워져요.',
+  },
+  {
+    id: 3,
+    name: '화성',
+    diameterKm: 6779,
+    radius: 34,
+    color: '#c1440e',
+    description: '붉은 흙으로 덮여 있어 "붉은 행성"이라고 불러요.',
+    fact: '태양계에서 가장 높은 화산 "올림푸스 산"이 있어요. 에베레스트의 약 2.5배 높이!',
+  },
+  {
+    id: 4,
+    name: '금성',
+    diameterKm: 12104,
+    radius: 41,
+    color: '#e6c78a',
+    description: '새벽이나 저녁 하늘에서 가장 밝게 빛나는 "샛별"이에요.',
+    fact: '두꺼운 구름이 열을 가둬서 수성보다 더 뜨거운, 태양계에서 가장 뜨거운 행성이에요.',
+  },
+  {
+    id: 5,
+    name: '지구',
+    diameterKm: 12742,
+    radius: 49,
+    color: '#3a7bd5',
+    description: '우리가 살고 있는, 물과 생명이 있는 푸른 행성이에요.',
+    fact: '표면의 약 70%가 바다라서 우주에서 보면 파랗게 보여요.',
+  },
+  {
+    id: 6,
+    name: '해왕성',
+    diameterKm: 49244,
+    radius: 58,
+    color: '#3457d5',
+    description: '태양에서 가장 멀리 있는, 짙은 파란색 행성이에요.',
+    fact: '태양계에서 바람이 가장 세게 불어요. 시속 2,000km가 넘는 폭풍이 불기도 해요.',
+  },
+  {
+    id: 7,
+    name: '천왕성',
+    diameterKm: 50724,
+    radius: 69,
+    color: '#7fd4e0',
+    description: '자전축이 옆으로 누워서 굴러가듯 도는 청록색 행성이에요.',
+    fact: '한 계절이 약 21년이나 계속돼요.',
+  },
+  {
+    id: 8,
+    name: '토성',
+    diameterKm: 116460,
+    radius: 82,
+    color: '#e0c16c',
+    description: '크고 아름다운 고리를 가진 행성이에요.',
+    fact: '고리는 얼음과 바위 조각으로 되어 있고, 행성 자체는 물에 뜰 만큼 가벼워요.',
+  },
+  {
+    id: 9,
+    name: '목성',
+    diameterKm: 142984,
+    radius: 96,
+    color: '#d9a066',
+    description: '태양계에서 가장 큰 행성이에요.',
+    fact: '"대적점"이라는 거대한 폭풍이 300년 넘게 계속되고 있어요. 지구보다 커요!',
+  },
+  {
+    id: 10,
+    name: '태양',
+    diameterKm: 1392000,
+    radius: 112,
+    color: '#ffd54f',
+    description: '태양계의 중심에 있는 뜨거운 별이에요. 행성이 아니라 별이랍니다.',
+    fact: '태양 안에는 지구가 약 130만 개나 들어갈 수 있어요.',
+  },
+]
+
+// 등장 천체 범위(SPAWN_POOL_SIZE)는 config.js 에서 조정합니다.
+export { SPAWN_POOL_SIZE } from './config'
