@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { PERIODS } from '../game/leaderboardConfig'
 import { fetchTopScores, isOnlineMode, pendingCount } from '../game/leaderboard'
+import { nextResetText } from '../game/periods'
 
 const MEDALS = ['🥇', '🥈', '🥉']
 
@@ -85,6 +86,7 @@ function LeaderboardPanel({ refreshKey, player, onChangePlayer }) {
       )}
 
       <div className="lb-footer">
+        <p className="lb-note lb-reset">⏱ {nextResetText(periodId)}</p>
         {mode === 'local' && (
           <p className="lb-note">이 기기에만 저장되는 연습용 순위표예요.</p>
         )}

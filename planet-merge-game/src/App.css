@@ -666,6 +666,11 @@
   color: #ffb4a2;
 }
 
+.lb-note.lb-reset {
+  color: var(--accent);
+  opacity: 0.85;
+}
+
 .lb-player {
   width: 100%;
   padding: 6px 8px;

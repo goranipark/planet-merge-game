@@ -11,6 +11,7 @@ import {
   ALLOW_CUSTOM_NICKNAME,
 } from './leaderboardConfig'
 import { isGeneratedNickname } from './nicknames'
+import { periodKeys } from './periods'
 
 const LOCAL_SCORES_KEY = 'planet-merge-game:local-scores'
 const PENDING_KEY = 'planet-merge-game:pending-scores'
@@ -37,15 +38,9 @@ function writeJson(key, value) {
   }
 }
 
-export function periodStart(periodId) {
+function periodField(periodId) {
   const period = PERIODS.find((p) => p.id === periodId) ?? PERIODS[0]
-  const start = new Date()
-  if (period.days === 1) {
-    start.setHours(0, 0, 0, 0) // 오늘 0시부터
-  } else {
-    start.setDate(start.getDate() - period.days)
-  }
-  return start
+  return period.field
 }
 
 // 이상값 방어 (Data.md 7장) — 빈 값, 음수, 과도한 점수, 너무 긴 별명 차단
@@ -70,6 +65,7 @@ export function validateEntry({ nickname, score, stageReached }) {
       nickname: cleanNickname,
       score: cleanScore,
       stageReached: String(stageReached ?? '').slice(0, 12),
+      ...periodKeys(), // 오늘/이번 주/이번 달 열쇠값 (초기화 주기는 RESET 설정을 따름)
     },
   }
 }
@@ -110,14 +106,16 @@ async function fetchFromFirestore(periodId) {
   const conn = await getFirestore()
   if (!conn) throw new Error('firebase-unavailable')
   const { db, fs } = conn
+  // 기간 열쇠값이 같은 기록 중 점수 상위 N개만 서버에서 바로 가져옵니다.
+  // (예전처럼 최근 기록을 잔뜩 받아와 앱에서 고르지 않으므로, 기록이 많아도 1위를 놓치지 않습니다)
   const q = fs.query(
     fs.collection(db, 'scores'),
-    fs.where('createdAt', '>=', fs.Timestamp.fromDate(periodStart(periodId))),
-    fs.orderBy('createdAt', 'desc'),
-    fs.limit(300)
+    fs.where(periodField(periodId), '==', periodKeys()[periodField(periodId)]),
+    fs.orderBy('score', 'desc'),
+    fs.limit(TOP_LIMIT)
   )
   const snapshot = await fs.getDocs(q)
-  const rows = snapshot.docs.map((doc) => {
+  return snapshot.docs.map((doc) => {
     const data = doc.data()
     return {
       id: doc.id,
@@ -127,7 +125,6 @@ async function fetchFromFirestore(periodId) {
       createdAt: data.createdAt?.toDate?.()?.getTime() ?? Date.now(),
     }
   })
-  return rows.sort((a, b) => b.score - a.score).slice(0, TOP_LIMIT)
 }
 
 // ---------- 로컬 백엔드 (Firebase 설정 전 / 오프라인 연습용) ----------
@@ -141,9 +138,10 @@ function submitToLocal(entry) {
 }
 
 function fetchFromLocal(periodId) {
-  const since = periodStart(periodId).getTime()
+  const field = periodField(periodId)
+  const currentKey = periodKeys()[field]
   return readJson(LOCAL_SCORES_KEY, [])
-    .filter((row) => row.createdAt >= since)
+    .filter((row) => row[field] === currentKey)
     .sort((a, b) => b.score - a.score)
     .slice(0, TOP_LIMIT)
 }

@@ -20,9 +20,16 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // 개인정보 보호: 별명·점수·도달 천체·시각만 저장하며, 그 외 필드는 아예 거부합니다.
+    // 개인정보 보호: 별명·점수·도달 천체·시각·기간열쇠만 저장하며, 그 외 필드는 아예 거부합니다.
+    // (dayKey/weekKey/monthKey = 어느 기간 순위에 속하는지 나타내는 값. 초기화 주기 설정에 사용)
     function isValidScore(data) {
-      return data.keys().hasOnly(['nickname', 'score', 'stageReached', 'createdAt'])
+      return data.keys().hasOnly(['nickname', 'score', 'stageReached', 'createdAt', 'dayKey', 'weekKey', 'monthKey'])
+        && data.dayKey is string
+        && data.dayKey.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && data.weekKey is string
+        && data.weekKey.matches('^W[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && data.monthKey is string
+        && data.monthKey.matches('^M[0-9]{4}-[0-9]{2}-[0-9]{2}$')
         && data.nickname is string
         && data.nickname.size() > 0
         && data.nickname.size() <= 8          // leaderboardConfig.js 의 NICKNAME_MAX 와 동일하게

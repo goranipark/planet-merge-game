@@ -31,9 +31,25 @@ export const ALLOW_CUSTOM_NICKNAME = false
 // (Firestore 보안 규칙에도 같은 값을 넣어야 실제로 차단됩니다 — FIREBASE-설정안내.md 참고)
 export const MAX_SCORE = 100000
 
-// [6] 리더보드 기간 탭
+// [6] 순위표 초기화 주기 설정
+// 각 순위는 아래 기준이 바뀌는 순간 "새 순위"로 넘어갑니다. (예전 기록이 지워지는 것은 아니고,
+// 해당 기간 순위표에서만 빠집니다. 완전 삭제는 FIREBASE-설정안내.md 의 초기화 명령 참고)
+export const RESET = {
+  // 하루의 시작 시각 (0~23). 0 = 매일 자정에 초기화
+  // 예: 9로 두면 매일 오전 9시에 새 순위가 시작됩니다 (등교 후 시작을 원할 때)
+  dayStartHour: 0,
+
+  // 주의 시작 요일 (0=일요일, 1=월요일 … 6=토요일). 1 = 매주 월요일 0시에 초기화
+  weekStartsOn: 1,
+
+  // 달의 시작 날짜 (1~28). 1 = 매월 1일에 초기화
+  monthStartsOnDay: 1,
+}
+
+// [7] 순위표 기간 탭
+// label 은 화면에 보이는 이름입니다. 필요 없는 탭은 지워도 됩니다.
 export const PERIODS = [
-  { id: 'daily', label: '매일', days: 1 },
-  { id: 'weekly', label: '매주', days: 7 },
-  { id: 'monthly', label: '매월', days: 30 },
+  { id: 'daily', label: '오늘', field: 'dayKey' },
+  { id: 'weekly', label: '이번 주', field: 'weekKey' },
+  { id: 'monthly', label: '이번 달', field: 'monthKey' },
 ]
