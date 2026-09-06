@@ -1,7 +1,7 @@
 #game-page {
   position: relative;
   z-index: 1;
-  max-width: 720px;
+  max-width: 950px;
   margin: 0 auto;
   padding: 24px 16px 48px;
   text-align: center;
@@ -331,7 +331,24 @@
   white-space: nowrap;
 }
 
-/* 화면이 좁으면 병 위쪽에 가로로 배치 */
+/* 화면이 좁으면 순서표·순위표를 병 위아래로 배치 */
+@media (max-width: 940px) {
+  .play-area {
+    flex-wrap: wrap;
+  }
+
+  .leaderboard {
+    width: 100%;
+    max-width: 400px;
+    order: 3;
+  }
+
+  .lb-list,
+  .lb-empty {
+    min-height: 0;
+  }
+}
+
 @media (max-width: 700px) {
   .play-area {
     flex-direction: column;
@@ -489,6 +506,322 @@
   margin-top: 8px;
   font-size: 12px;
   color: var(--muted);
+}
+
+/* ---------- 순위표 ---------- */
+.leaderboard {
+  width: 210px;
+  flex: none;
+  padding: 12px 10px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lb-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.lb-title {
+  font-size: 17px;
+  color: var(--accent);
+  text-shadow: 0 2px 0 var(--outline);
+}
+
+.lb-refresh {
+  position: absolute;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.lb-refresh:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.lb-tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.lb-tab {
+  flex: 1;
+  padding: 5px 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.lb-tab.is-active {
+  background: var(--accent);
+  color: var(--outline);
+}
+
+.lb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 150px;
+}
+
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 7px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.lb-row.is-top {
+  background: rgba(255, 213, 79, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 213, 79, 0.35);
+}
+
+.lb-rank {
+  flex: none;
+  width: 22px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.lb-who {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.lb-who strong {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lb-who em {
+  font-size: 10.5px;
+  font-style: normal;
+  color: var(--muted);
+}
+
+.lb-score {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--accent);
+}
+
+.lb-empty {
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.lb-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lb-note {
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--muted);
+  text-align: center;
+  word-break: keep-all;
+}
+
+.lb-note.lb-warn {
+  color: #ffb4a2;
+}
+
+.lb-player {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.lb-player span {
+  color: var(--accent);
+  font-weight: 400;
+}
+
+.lb-player:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* ---------- 반/별명 입력 ---------- */
+.setup-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(4, 6, 16, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fade-in 0.25s ease-out;
+}
+
+.setup-card {
+  width: 100%;
+  max-width: 330px;
+  background: linear-gradient(180deg, #2a3160, #171c3a);
+  border: 3px solid var(--outline);
+  border-radius: 22px;
+  padding: 22px 24px 24px;
+  box-shadow: 0 8px 0 var(--outline), 0 16px 40px rgba(0, 0, 0, 0.5);
+  animation: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-align: center;
+}
+
+.setup-card h2 {
+  font-size: 24px;
+  color: var(--accent);
+  text-shadow: 0 3px 0 var(--outline);
+}
+
+.setup-desc {
+  margin: 6px 0 16px;
+  font-size: 13px;
+  color: var(--muted);
+  word-break: keep-all;
+}
+
+.setup-field {
+  display: block;
+  text-align: left;
+  margin-bottom: 12px;
+}
+
+.setup-field > span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.setup-field select,
+.setup-field input {
+  width: 100%;
+  padding: 9px 11px;
+  border: 2px solid var(--card-border);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+
+.setup-field select:focus,
+.setup-field input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.setup-warning {
+  margin: 0 0 4px;
+  padding: 7px 9px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  text-align: left;
+  color: #e6e9f5;
+  background: rgba(255, 213, 79, 0.1);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  word-break: keep-all;
+}
+
+.setup-warning strong {
+  color: var(--accent);
+}
+
+.setup-error {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #ff9aa8;
+}
+
+.setup-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.btn-ghost {
+  padding: 10px 20px;
+  border: 3px solid var(--card-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.btn-ghost:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.setup-actions .btn-primary {
+  margin-top: 0;
+}
+
+/* 게임오버 모달의 순위표 등록 상태 */
+.game-over-submit {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--muted);
+  word-break: keep-all;
+}
+
+.game-over-submit.is-saved {
+  color: #9ee493;
+}
+
+.game-over-submit.is-queued,
+.game-over-submit.is-rejected {
+  color: #ffb4a2;
 }
 
 /* ---------- 하단 저작권 표기 ---------- */

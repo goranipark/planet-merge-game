@@ -3,6 +3,9 @@ import { createGame } from './game/engine'
 import { createAudioManager } from './game/audio'
 import { loadBestScore, saveBestScore } from './game/storage'
 import { CONTAINER_WIDTH, CONTAINER_HEIGHT } from './game/config'
+import { STAGES } from './game/objects'
+import { loadPlayer, savePlayer } from './game/playerStorage'
+import { submitScore, flushPending } from './game/leaderboard'
 import SpaceBackground from './components/SpaceBackground'
 import ScoreBoard from './components/ScoreBoard'
 import NextPreview from './components/NextPreview'
@@ -10,6 +13,8 @@ import GameOverModal from './components/GameOverModal'
 import MuteButton from './components/MuteButton'
 import InfoCard from './components/InfoCard'
 import PlanetGuide from './components/PlanetGuide'
+import LeaderboardPanel from './components/LeaderboardPanel'
+import PlayerSetup from './components/PlayerSetup'
 import SiteFooter from './components/SiteFooter'
 import './App.css'
 
@@ -20,6 +25,8 @@ function App() {
   const gameRef = useRef(null)
   // 한 번 본 천체 카드는 다시 안 띄움 (페이지를 새로고침하면 초기화)
   const seenStagesRef = useRef(new Set())
+  const maxStageRef = useRef(-1)
+  const playerRef = useRef(null)
 
   const [score, setScore] = useState(0)
   const [best, setBest] = useState(() => loadBestScore())
@@ -29,6 +36,12 @@ function App() {
   const [muted, setMuted] = useState(false)
   const [cardQueue, setCardQueue] = useState([]) // 순서대로 보여줄 정보 카드(단계 번호)
   const [maxStage, setMaxStage] = useState(-1) // 이번 판에서 만들어 본 가장 큰 천체
+  const [player, setPlayer] = useState(() => loadPlayer())
+  const [showSetup, setShowSetup] = useState(() => loadPlayer() === null)
+  const [submitState, setSubmitState] = useState(null)
+  const [lbRefreshKey, setLbRefreshKey] = useState(0)
+
+  playerRef.current = player
 
   // 오디오 매니저는 앱 전체에서 하나만 사용
   if (!audioRef.current) {
@@ -37,6 +50,15 @@ function App() {
 
   useEffect(() => {
     return () => audioRef.current?.dispose()
+  }, [])
+
+  // 지난번에 인터넷 문제로 못 보낸 기록이 있으면 시작할 때 다시 전송
+  useEffect(() => {
+    flushPending()
+      .then((sent) => {
+        if (sent > 0) setLbRefreshKey((k) => k + 1)
+      })
+      .catch(() => {})
   }, [])
 
   // 브라우저 정책: 사용자가 첫 클릭/터치를 한 뒤에야 소리를 낼 수 있음 → 그때 BGM 시작
@@ -58,10 +80,12 @@ function App() {
 
   useEffect(() => {
     scoreRef.current = 0
+    maxStageRef.current = -1
     setScore(0)
     setIsGameOver(false)
     setCardQueue([])
     setMaxStage(-1)
+    setSubmitState(null)
 
     const audio = audioRef.current
     const game = createGame(containerRef.current, {
@@ -78,6 +102,7 @@ function App() {
       onNextChange: (stage) => setNextStage(stage),
       onSfx: (name, detail) => audio.play(name, detail),
       onMerge: (stage) => {
+        maxStageRef.current = Math.max(maxStageRef.current, stage)
         setMaxStage((prev) => Math.max(prev, stage))
         // 처음 만든 천체면 게임을 멈추고 정보 카드 표시
         if (seenStagesRef.current.has(stage)) return
@@ -88,6 +113,7 @@ function App() {
       onGameOver: () => {
         audio.play('gameover')
         setIsGameOver(true)
+        handleGameOverSubmit()
       },
     })
     gameRef.current = game
@@ -97,6 +123,37 @@ function App() {
       gameRef.current = null
     }
   }, [gameKey])
+
+  // 게임이 끝나면 점수를 순위표에 등록 (반·별명을 정한 경우에만)
+  async function handleGameOverSubmit() {
+    const currentPlayer = playerRef.current
+    if (!currentPlayer) {
+      setSubmitState('skipped')
+      return
+    }
+    if (scoreRef.current <= 0) {
+      setSubmitState(null)
+      return
+    }
+
+    setSubmitState('submitting')
+    const stageName =
+      maxStageRef.current >= 0 ? STAGES[maxStageRef.current].name : '소행성'
+    const result = await submitScore({
+      className: currentPlayer.className,
+      nickname: currentPlayer.nickname,
+      score: scoreRef.current,
+      stageReached: stageName,
+    })
+    setSubmitState(result.status)
+    setLbRefreshKey((k) => k + 1)
+  }
+
+  function handleSavePlayer(next) {
+    savePlayer(next)
+    setPlayer(next)
+    setShowSetup(false)
+  }
 
   function closeCard() {
     const rest = cardQueue.slice(1)
@@ -150,14 +207,29 @@ function App() {
               <GameOverModal
                 score={score}
                 best={best}
+                submitState={submitState}
                 onRestart={() => setGameKey((k) => k + 1)}
               />
             )}
           </div>
+
+          <LeaderboardPanel
+            refreshKey={lbRefreshKey}
+            player={player}
+            onChangePlayer={() => setShowSetup(true)}
+          />
         </div>
 
         <SiteFooter />
       </div>
+
+      {showSetup && (
+        <PlayerSetup
+          initial={player}
+          onSave={handleSavePlayer}
+          onCancel={player ? () => setShowSetup(false) : null}
+        />
+      )}
     </>
   )
 }

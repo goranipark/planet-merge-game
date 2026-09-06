@@ -1,0 +1,39 @@
+rules_version = '2';
+
+// 행성 합치기 게임 — Firestore 보안 규칙 (Data.md 5장, 8장)
+// Firebase 콘솔 → Firestore Database → 규칙 탭에 이 내용을 붙여넣고 "게시"하세요.
+// ※ "테스트 모드"를 그대로 두면 누구나 모든 데이터를 지울 수 있습니다. 반드시 교체하세요.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /scores/{scoreId} {
+      // 누구나 순위표를 볼 수 있음 (로그인 없이 링크만으로 접속하는 구조)
+      allow read: if true;
+
+      // 새 기록 등록만 허용 — 수정·삭제는 콘솔에서 교사만 가능
+      allow create: if isValidScore(request.resource.data);
+      allow update, delete: if false;
+    }
+
+    // 그 외 모든 경로는 차단
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidScore(data) {
+      return data.keys().hasOnly(['className', 'nickname', 'score', 'stageReached', 'createdAt'])
+        && data.className is string
+        && data.className.size() > 0
+        && data.className.size() <= 20
+        && data.nickname is string
+        && data.nickname.size() > 0
+        && data.nickname.size() <= 8          // leaderboardConfig.js 의 NICKNAME_MAX 와 동일하게
+        && data.score is int
+        && data.score >= 0
+        && data.score <= 100000               // leaderboardConfig.js 의 MAX_SCORE 와 동일하게
+        && data.stageReached is string
+        && data.stageReached.size() <= 12
+        && data.createdAt == request.time;    // 시간 조작 방지 (서버 시각만 허용)
+    }
+  }
+}
