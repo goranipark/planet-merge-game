@@ -42,12 +42,12 @@ scores (컬렉션)
 > 단계별 안내는 [FIREBASE-설정안내.md](FIREBASE-설정안내.md) 참고.
 > 설정 전까지는 순위표가 "이 기기에만 저장되는 연습용"으로 동작합니다.
 
-- [ ] **(선생님)** Firebase 콘솔에서 프로젝트 생성 (무료 Spark 플랜)
-- [ ] **(선생님)** Firestore Database 활성화 — 위치는 asia-northeast3(서울)
-- [ ] **(선생님)** 웹 앱 등록 → SDK config 키를 `src/game/leaderboardConfig.js`에 붙여넣기
+- [x] Firebase 프로젝트 생성 — `planet-merge-game-gorani` (무료 Spark 플랜)
+- [x] Firestore Database 생성 — 서울(asia-northeast3)
+- [x] 웹 앱 등록 → SDK config 키를 `src/game/leaderboardConfig.js`에 입력 완료
 - [x] React 프로젝트에 설치: `npm install firebase`
 - [x] 초기화 코드 작성 → `src/game/leaderboard.js` (동적 import로 분리해, 설정 전에는 학생 기기가 firebase 코드를 내려받지 않음)
-- [x] Firestore Security Rules 작성 → [`firestore.rules`](firestore.rules) — **(선생님)** 콘솔 규칙 탭에 붙여넣고 게시 필요
+- [x] Firestore Security Rules 작성 및 **배포 완료** → [`firestore.rules`](firestore.rules)
 
 ---
 
@@ -67,6 +67,8 @@ scores (컬렉션)
 
 - [x] Firestore Security Rules에 점수 범위(0~100,000) 초과 시 쓰기 거부 조건 추가 — 클라이언트에서도 동일하게 검증
 - [x] 규칙에서 **수정·삭제 전면 차단**(장난으로 남의 기록을 지울 수 없음), 시각은 서버 시각만 인정
+- [x] 규칙에서 **별명도 검증** — 게임이 제공하는 900가지 조합만 통과. 개발자도구로 임의 별명을 직접 넣어도 서버가 거부
+      (낱말 목록을 바꾸면 `npm run rules` 실행 후 규칙 재배포 필요)
 - [ ] (여유 있으면) Cloud Functions로 점수 제출을 검증 후 기록 — 학교 규모에서는 필수는 아님
 
 ---
@@ -94,7 +96,7 @@ scores (컬렉션)
 
 ## 8. To-Do: 배포 전 최종 점검
 
-- [ ] **(선생님)** Security Rules를 프로덕션 기준으로 전환했는지 확인 (테스트 모드 방치 금지 — 30일 뒤 차단됨)
+- [x] Security Rules 프로덕션 기준 적용 완료 (테스트 모드 사용하지 않음)
 - [x] 리더보드 초기화 방법 정리 → [FIREBASE-설정안내.md](FIREBASE-설정안내.md) "자주 묻는 것" 참고 (콘솔에서 `scores` 컬렉션 삭제)
 - [x] GitHub Pages 배포 상태에서 순위표 UI·저장·조회 정상 동작 확인 (연습용 모드 기준)
 - [ ] **(선생님)** Firebase 설정 후 배포본에서 온라인 저장이 되는지 최종 확인

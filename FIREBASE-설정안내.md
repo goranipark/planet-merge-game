@@ -1,9 +1,24 @@
-# 온라인 순위표 켜기 (Firebase 설정 안내)
+# 온라인 순위표 (Firebase) — ✅ 설정 완료
 
-지금 게임의 순위표는 **"이 기기에만 저장되는 연습용"**으로 동작합니다.
-아래 순서대로 하면 **여러 반이 함께 보는 온라인 순위표**로 바뀝니다. 코딩 지식은 필요 없고, 15~20분 정도 걸립니다.
+**온라인 순위표가 이미 켜져 있습니다.** 여러 반 학생이 같은 순위표를 함께 봅니다.
 
-> 설정하지 않아도 게임은 정상 작동합니다. 학급 하나에서만 쓰신다면 지금 상태로도 충분합니다.
+| 항목 | 내용 |
+|---|---|
+| 프로젝트 ID | `planet-merge-game-gorani` |
+| 관리 콘솔 | https://console.firebase.google.com/project/planet-merge-game-gorani/firestore |
+| 소유 계정 | bio6734@gmail.com |
+| 데이터 위치 | 서울(asia-northeast3) |
+| 요금제 | 무료(Spark) |
+| 저장 항목 | 별명, 점수, 도달 천체, 시각 (이름·학번·반 없음) |
+
+**기록을 초기화하려면** (새 학기·새 대회 시작 시) 콘솔에서 `scores` 컬렉션을 삭제하거나,
+"행성합치기게임" 폴더에서 터미널을 열고 아래를 실행하세요.
+
+```bash
+firebase firestore:delete scores --recursive --force --project planet-merge-game-gorani
+```
+
+아래 내용은 **처음부터 다시 설정하거나 다른 계정으로 옮길 때** 참고하시면 됩니다.
 
 ---
 

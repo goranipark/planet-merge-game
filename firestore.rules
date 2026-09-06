@@ -26,6 +26,8 @@ service cloud.firestore {
         && data.nickname is string
         && data.nickname.size() > 0
         && data.nickname.size() <= 8          // leaderboardConfig.js 의 NICKNAME_MAX 와 동일하게
+        // 게임이 제공하는 별명 조합만 허용 — 개발자도구로 임의의 말을 넣어도 서버에서 거부됨
+        && data.nickname.matches('^(반짝이는|빛나는|씩씩한|용감한|슬기로운|재빠른|다정한|든든한|신나는|멋진|귀여운|부지런한|상냥한|똑똑한|자유로운|따뜻한|명랑한|힘찬|푸른|붉은|은빛|금빛|날쌘|착한|높이나는|꿈꾸는|노래하는|춤추는|웃는|달리는)(소행성|달빛|수성|화성|금성|지구|해왕성|천왕성|토성|목성|태양|별똥별|은하수|우주선|탐험가|망원경|오로라|혜성|성운|북극성|우주인|나침반|보름달|초승달|유성우|천문대|로켓|위성|별자리|우주복)$') // NICKNAME_PATTERN (자동 생성: npm run rules)
         && data.score is int
         && data.score >= 0
         && data.score <= 100000               // leaderboardConfig.js 의 MAX_SCORE 와 동일하게

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "rules": "node ../scripts/build-firestore-rules.mjs",
     "lint": "oxlint",
     "preview": "vite preview"
   },

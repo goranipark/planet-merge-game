@@ -7,12 +7,12 @@
 // Firebase 콘솔에서 발급받은 값을 아래에 붙여넣으면 자동으로 온라인(반 전체 공유)으로 바뀝니다.
 // 붙여넣는 방법은 저장소의 FIREBASE-설정안내.md 를 참고하세요.
 export const FIREBASE_CONFIG = {
-  apiKey: '',
-  authDomain: '',
-  projectId: '',
-  storageBucket: '',
-  messagingSenderId: '',
-  appId: '',
+  apiKey: 'AIzaSyDmC1-tv4u5am7v2p3fZRPZAsO0KoDj9to',
+  authDomain: 'planet-merge-game-gorani.firebaseapp.com',
+  projectId: 'planet-merge-game-gorani',
+  storageBucket: 'planet-merge-game-gorani.firebasestorage.app',
+  messagingSenderId: '1033179506423',
+  appId: '1:1033179506423:web:953aeb42fe1745bcda95f2',
 }
 
 // [2] 리더보드에 보여줄 순위 개수 (design.md 기준 1~5위)
