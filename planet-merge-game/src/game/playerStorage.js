@@ -1,4 +1,5 @@
-// 학생이 정한 "반 + 별명"을 기기에 저장 (매번 다시 입력하지 않도록)
+// 학생이 고른 별명을 기기에 저장 (매번 다시 고르지 않도록)
+// 별명 외의 개인정보(이름·반·학번)는 저장하지 않습니다.
 const PLAYER_KEY = 'planet-merge-game:player'
 
 export function loadPlayer() {
@@ -6,8 +7,8 @@ export function loadPlayer() {
     const raw = window.localStorage.getItem(PLAYER_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw)
-    if (!parsed?.className || !parsed?.nickname) return null
-    return { className: parsed.className, nickname: parsed.nickname }
+    if (!parsed?.nickname) return null
+    return { nickname: parsed.nickname } // 예전에 저장된 반 정보가 있어도 버림
   } catch {
     return null
   }

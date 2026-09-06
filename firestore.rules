@@ -20,11 +20,9 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // 개인정보 보호: 별명·점수·도달 천체·시각만 저장하며, 그 외 필드는 아예 거부합니다.
     function isValidScore(data) {
-      return data.keys().hasOnly(['className', 'nickname', 'score', 'stageReached', 'createdAt'])
-        && data.className is string
-        && data.className.size() > 0
-        && data.className.size() <= 20
+      return data.keys().hasOnly(['nickname', 'score', 'stageReached', 'createdAt'])
         && data.nickname is string
         && data.nickname.size() > 0
         && data.nickname.size() <= 8          // leaderboardConfig.js 의 NICKNAME_MAX 와 동일하게

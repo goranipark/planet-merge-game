@@ -76,7 +76,7 @@ function LeaderboardPanel({ refreshKey, player, onChangePlayer }) {
               <span className="lb-rank">{MEDALS[index] ?? index + 1}</span>
               <span className="lb-who">
                 <strong>{row.nickname}</strong>
-                <em>{row.className}</em>
+                {row.stageReached && <em>{row.stageReached}까지</em>}
               </span>
               <span className="lb-score">{row.score.toLocaleString('ko-KR')}</span>
             </li>
@@ -98,7 +98,7 @@ function LeaderboardPanel({ refreshKey, player, onChangePlayer }) {
         )}
         {player && (
           <button type="button" className="lb-player" onClick={onChangePlayer}>
-            {player.className} · {player.nickname} <span>바꾸기</span>
+            {player.nickname} <span>바꾸기</span>
           </button>
         )}
       </div>

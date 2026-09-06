@@ -14,7 +14,7 @@ import MuteButton from './components/MuteButton'
 import InfoCard from './components/InfoCard'
 import PlanetGuide from './components/PlanetGuide'
 import LeaderboardPanel from './components/LeaderboardPanel'
-import PlayerSetup from './components/PlayerSetup'
+import NicknamePicker from './components/NicknamePicker'
 import SiteFooter from './components/SiteFooter'
 import './App.css'
 
@@ -140,7 +140,6 @@ function App() {
     const stageName =
       maxStageRef.current >= 0 ? STAGES[maxStageRef.current].name : '소행성'
     const result = await submitScore({
-      className: currentPlayer.className,
       nickname: currentPlayer.nickname,
       score: scoreRef.current,
       stageReached: stageName,
@@ -224,7 +223,7 @@ function App() {
       </div>
 
       {showSetup && (
-        <PlayerSetup
+        <NicknamePicker
           initial={player}
           onSave={handleSavePlayer}
           onCancel={player ? () => setShowSetup(false) : null}

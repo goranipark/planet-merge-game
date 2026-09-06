@@ -8,7 +8,9 @@ import {
   NICKNAME_MAX,
   MAX_SCORE,
   PERIODS,
+  ALLOW_CUSTOM_NICKNAME,
 } from './leaderboardConfig'
+import { isGeneratedNickname } from './nicknames'
 
 const LOCAL_SCORES_KEY = 'planet-merge-game:local-scores'
 const PENDING_KEY = 'planet-merge-game:pending-scores'
@@ -46,16 +48,17 @@ export function periodStart(periodId) {
   return start
 }
 
-// 이상값 방어 (Data.md 7장) — 빈 값, 음수, 과도한 점수, 너무 긴 닉네임 차단
-export function validateEntry({ className, nickname, score, stageReached }) {
+// 이상값 방어 (Data.md 7장) — 빈 값, 음수, 과도한 점수, 너무 긴 별명 차단
+// 개인정보 보호를 위해 별명 외의 정보(반, 이름 등)는 저장하지 않습니다.
+export function validateEntry({ nickname, score, stageReached }) {
   const cleanNickname = String(nickname ?? '')
     .trim()
     .slice(0, NICKNAME_MAX)
-  const cleanClass = String(className ?? '').trim()
   const cleanScore = Math.floor(Number(score))
 
-  if (!cleanClass) return { ok: false, reason: '반이 선택되지 않았습니다.' }
   if (!cleanNickname) return { ok: false, reason: '별명이 비어 있습니다.' }
+  if (!ALLOW_CUSTOM_NICKNAME && !isGeneratedNickname(cleanNickname))
+    return { ok: false, reason: '준비된 별명 중에서 골라 주세요.' }
   if (!Number.isFinite(cleanScore) || cleanScore < 0)
     return { ok: false, reason: '점수가 올바르지 않습니다.' }
   if (cleanScore > MAX_SCORE)
@@ -64,7 +67,6 @@ export function validateEntry({ className, nickname, score, stageReached }) {
   return {
     ok: true,
     entry: {
-      className: cleanClass,
       nickname: cleanNickname,
       score: cleanScore,
       stageReached: String(stageReached ?? '').slice(0, 12),
@@ -119,7 +121,6 @@ async function fetchFromFirestore(periodId) {
     const data = doc.data()
     return {
       id: doc.id,
-      className: data.className,
       nickname: data.nickname,
       score: data.score,
       stageReached: data.stageReached,
@@ -132,7 +133,9 @@ async function fetchFromFirestore(periodId) {
 // ---------- 로컬 백엔드 (Firebase 설정 전 / 오프라인 연습용) ----------
 function submitToLocal(entry) {
   const rows = readJson(LOCAL_SCORES_KEY, [])
-  rows.push({ ...entry, id: `local-${Date.now()}`, createdAt: Date.now() })
+  // 같은 밀리초에 여러 건이 저장돼도 ID가 겹치지 않도록 임의 문자열을 덧붙임
+  const id = `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  rows.push({ ...entry, id, createdAt: Date.now() })
   // 너무 많이 쌓이지 않도록 최근 500건만 보관
   writeJson(LOCAL_SCORES_KEY, rows.slice(-500))
 }
