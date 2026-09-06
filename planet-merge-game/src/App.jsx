@@ -10,6 +10,7 @@ import GameOverModal from './components/GameOverModal'
 import MuteButton from './components/MuteButton'
 import InfoCard from './components/InfoCard'
 import PlanetGuide from './components/PlanetGuide'
+import SiteFooter from './components/SiteFooter'
 import './App.css'
 
 function App() {
@@ -154,6 +155,8 @@ function App() {
             )}
           </div>
         </div>
+
+        <SiteFooter />
       </div>
     </>
   )
