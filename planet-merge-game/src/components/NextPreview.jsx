@@ -6,7 +6,7 @@ function NextPreview({ stage }) {
 
   return (
     <div className="card next-preview">
-      <span className="label">다음</span>
+      <span className="label">다음 차례</span>
       <img
         className="next-preview-sprite"
         src={getSprite(stage)}

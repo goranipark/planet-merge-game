@@ -164,6 +164,9 @@ export function createGame(
   }
 
   // ---------- 조준 & 낙하 ----------
+  // 대기열 2개: currentStage = 지금 병 위에 떠 있어 곧 떨어질 천체,
+  //             nextStage    = 그다음에 나올 천체 (화면 위 "다음" 칸에 미리 보여줌)
+  let currentStage = randomSpawnStage()
   let nextStage = randomSpawnStage()
   let aimX = width / 2
   let lastDropAt = -Infinity
@@ -185,12 +188,14 @@ export function createGame(
 
   function drop() {
     if (!canDrop()) return
-    const x = clampAimX(aimX, nextStage)
-    World.add(engine.world, createStageBody(nextStage, x, SPAWN_Y))
+    const x = clampAimX(aimX, currentStage)
+    World.add(engine.world, createStageBody(currentStage, x, SPAWN_Y))
     lastDropAt = performance.now()
     onSfx?.('drop')
+    // 예고했던 천체가 병 위로 올라오고, 그다음 천체를 새로 뽑아 예고합니다
+    currentStage = nextStage
     nextStage = randomSpawnStage()
-    aimX = clampAimX(aimX, nextStage)
+    aimX = clampAimX(aimX, currentStage)
     onNextChange?.(nextStage)
   }
 
@@ -203,18 +208,18 @@ export function createGame(
 
   function handlePointerMove(event) {
     pointerInside = true
-    aimX = clampAimX(pointerX(event), nextStage)
+    aimX = clampAimX(pointerX(event), currentStage)
   }
 
   function handlePointerDown(event) {
     // 터치: 누른 위치로 먼저 이동 (끌다가 떼면 낙하)
     pointerInside = true
-    aimX = clampAimX(pointerX(event), nextStage)
+    aimX = clampAimX(pointerX(event), currentStage)
     event.preventDefault()
   }
 
   function handlePointerUp(event) {
-    aimX = clampAimX(pointerX(event), nextStage)
+    aimX = clampAimX(pointerX(event), currentStage)
     drop()
   }
 
@@ -384,8 +389,8 @@ export function createGame(
   // ---------- 매 프레임 그리기: 게임오버 라인, 조준 미리보기, 파티클 ----------
   function drawAimPreview(ctx) {
     if (isGameOver || isPaused || !canDrop()) return
-    const radius = stageRadius(nextStage)
-    const x = clampAimX(aimX, nextStage)
+    const radius = stageRadius(currentStage)
+    const x = clampAimX(aimX, currentStage)
 
     // 낙하 가이드 점선
     ctx.save()
@@ -399,7 +404,7 @@ export function createGame(
     ctx.restore()
 
     // 다음 천체 미리보기 (반투명)
-    const img = render.textures[getSprite(nextStage, 'normal')]
+    const img = render.textures[getSprite(currentStage, 'normal')]
     if (img && img.complete && img.naturalWidth > 0) {
       const scale = (radius * 2) / SPRITE_DISC_DIAMETER
       const w = img.naturalWidth * scale
