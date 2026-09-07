@@ -201,7 +201,12 @@ function App() {
           <div
             id="game-container-wrapper"
             className="jar"
-            style={{ width: `min(${CONTAINER_WIDTH}px, 100%)` }}
+            style={{
+              // 병 크기는 화면 가로폭과 세로높이 중 더 빠듯한 쪽에 맞춰 CSS에서 계산합니다.
+              // (크롬북처럼 세로가 짧은 화면에서 병 위아래가 잘리지 않도록)
+              '--jar-max-w': `${CONTAINER_WIDTH}px`,
+              '--jar-ratio': String(CONTAINER_WIDTH / CONTAINER_HEIGHT),
+            }}
           >
             <div
               ref={containerRef}

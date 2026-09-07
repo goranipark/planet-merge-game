@@ -122,10 +122,22 @@
 }
 
 /* ---------- 유리병 컨테이너 ---------- */
+/* 제목·점수판 등 병 위쪽 UI가 차지하는 높이 (아래 병 크기 계산에 사용) */
+:root {
+  --game-chrome: 268px;
+}
+
 .jar {
   position: relative;
-  width: 400px;
   margin: 0 auto;
+  /* 가로폭 기준과 세로높이 기준 중 더 작은 값으로 병 크기를 정합니다.
+     세로가 짧은 화면(크롬북 등)에서도 병 전체가 한 화면에 들어옵니다. */
+  width: min(
+    var(--jar-max-w, 400px),
+    100%,
+    calc((100vh - var(--game-chrome)) * var(--jar-ratio, 0.667))
+  );
+  min-width: 240px;
   border-radius: 0 0 28px 28px;
   border: 3px solid rgba(255, 255, 255, 0.28);
   border-top: none;
@@ -136,6 +148,60 @@
     inset 0 0 40px rgba(120, 160, 255, 0.12),
     0 10px 30px rgba(0, 0, 0, 0.45);
   overflow: hidden;
+}
+
+@supports (height: 100dvh) {
+  .jar {
+    width: min(
+      var(--jar-max-w, 400px),
+      100%,
+      calc((100dvh - var(--game-chrome)) * var(--jar-ratio, 0.667))
+    );
+  }
+}
+
+/* 세로가 짧은 화면(크롬북 등)에서는 제목·설명·여백을 줄여 게임 영역을 넓힘 */
+@media (max-height: 820px) {
+  :root {
+    --game-chrome: 206px;
+  }
+
+  #game-page {
+    padding-top: 12px;
+  }
+
+  #game-page h1 {
+    font-size: 24px;
+  }
+
+  .title-area p {
+    display: none;
+  }
+
+  .hud {
+    margin: 10px auto;
+  }
+}
+
+@media (max-height: 680px) {
+  :root {
+    --game-chrome: 166px;
+  }
+
+  #game-page h1 {
+    font-size: 20px;
+  }
+
+  .scoreboard,
+  .next-preview,
+  .mute-button {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+
+  .scoreboard-item .value {
+    font-size: 17px;
+  }
 }
 
 .jar::before {
@@ -1040,8 +1106,8 @@
 }
 
 @media (max-width: 440px) {
-  .hud,
-  .jar {
+  .hud {
     width: 100%;
   }
+  /* .jar 는 위에서 가로·세로를 함께 고려해 계산하므로 여기서 덮어쓰지 않습니다 */
 }
