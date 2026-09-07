@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { createGame } from './game/engine'
 import { createAudioManager } from './game/audio'
-import { loadBestScore, saveBestScore } from './game/storage'
+import {
+  loadBestScore,
+  saveBestScore,
+  loadSeenStages,
+  saveSeenStages,
+} from './game/storage'
 import { CONTAINER_WIDTH, CONTAINER_HEIGHT } from './game/config'
 import { STAGES } from './game/objects'
 import { loadPlayer, savePlayer } from './game/playerStorage'
@@ -25,8 +30,9 @@ function App() {
   const scoreRef = useRef(0)
   const audioRef = useRef(null)
   const gameRef = useRef(null)
-  // 한 번 본 천체 카드는 다시 안 띄움 (페이지를 새로고침하면 초기화)
-  const seenStagesRef = useRef(new Set())
+  // 한 번 본 천체 카드는 다시 안 띄움
+  // (같은 탭에서는 새로고침해도 유지되고, 탭을 닫으면 초기화 — config.js RESET_ON_TAB_CLOSE)
+  const seenStagesRef = useRef(loadSeenStages())
   const maxStageRef = useRef(-1)
   const playerRef = useRef(null)
   const roomRef = useRef(null)
@@ -113,6 +119,7 @@ function App() {
         // 처음 만든 천체면 게임을 멈추고 정보 카드 표시
         if (seenStagesRef.current.has(stage)) return
         seenStagesRef.current.add(stage)
+        saveSeenStages(seenStagesRef.current)
         setCardQueue((q) => [...q, stage])
         game.pause()
       },
