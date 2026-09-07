@@ -6,6 +6,7 @@ import { CONTAINER_WIDTH, CONTAINER_HEIGHT } from './game/config'
 import { STAGES } from './game/objects'
 import { loadPlayer, savePlayer } from './game/playerStorage'
 import { submitScore, flushPending } from './game/leaderboard'
+import { initRoom, saveRoom } from './game/room'
 import SpaceBackground from './components/SpaceBackground'
 import ScoreBoard from './components/ScoreBoard'
 import NextPreview from './components/NextPreview'
@@ -15,6 +16,7 @@ import InfoCard from './components/InfoCard'
 import PlanetGuide from './components/PlanetGuide'
 import LeaderboardPanel from './components/LeaderboardPanel'
 import NicknamePicker from './components/NicknamePicker'
+import RoomSetup from './components/RoomSetup'
 import SiteFooter from './components/SiteFooter'
 import './App.css'
 
@@ -27,6 +29,7 @@ function App() {
   const seenStagesRef = useRef(new Set())
   const maxStageRef = useRef(-1)
   const playerRef = useRef(null)
+  const roomRef = useRef(null)
 
   const [score, setScore] = useState(0)
   const [best, setBest] = useState(() => loadBestScore())
@@ -40,8 +43,11 @@ function App() {
   const [showSetup, setShowSetup] = useState(() => loadPlayer() === null)
   const [submitState, setSubmitState] = useState(null)
   const [lbRefreshKey, setLbRefreshKey] = useState(0)
+  const [room, setRoom] = useState(() => initRoom())
+  const [showRoomSetup, setShowRoomSetup] = useState(false)
 
   playerRef.current = player
+  roomRef.current = room
 
   // 오디오 매니저는 앱 전체에서 하나만 사용
   if (!audioRef.current) {
@@ -143,8 +149,16 @@ function App() {
       nickname: currentPlayer.nickname,
       score: scoreRef.current,
       stageReached: stageName,
+      room: roomRef.current,
     })
     setSubmitState(result.status)
+    setLbRefreshKey((k) => k + 1)
+  }
+
+  function handleSaveRoom(nextRoom) {
+    saveRoom(nextRoom)
+    setRoom(nextRoom)
+    setShowRoomSetup(false)
     setLbRefreshKey((k) => k + 1)
   }
 
@@ -216,6 +230,8 @@ function App() {
             refreshKey={lbRefreshKey}
             player={player}
             onChangePlayer={() => setShowSetup(true)}
+            room={room}
+            onChangeRoom={() => setShowRoomSetup(true)}
           />
         </div>
 
@@ -227,6 +243,14 @@ function App() {
           initial={player}
           onSave={handleSavePlayer}
           onCancel={player ? () => setShowSetup(false) : null}
+        />
+      )}
+
+      {showRoomSetup && (
+        <RoomSetup
+          room={room}
+          onSave={handleSaveRoom}
+          onClose={() => setShowRoomSetup(false)}
         />
       )}
     </>

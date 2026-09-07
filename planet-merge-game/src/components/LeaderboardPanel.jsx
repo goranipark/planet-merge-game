@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useState } from 'react'
-import { PERIODS } from '../game/leaderboardConfig'
+import { PERIODS, DEFAULT_ROOM } from '../game/leaderboardConfig'
 import { fetchTopScores, isOnlineMode, pendingCount } from '../game/leaderboard'
 import { nextResetText } from '../game/periods'
 
 const MEDALS = ['🥇', '🥈', '🥉']
 
-function LeaderboardPanel({ refreshKey, player, onChangePlayer }) {
+function LeaderboardPanel({
+  refreshKey,
+  player,
+  onChangePlayer,
+  room,
+  onChangeRoom,
+}) {
   const [periodId, setPeriodId] = useState(PERIODS[0].id)
   const [rows, setRows] = useState([])
   const [mode, setMode] = useState(isOnlineMode ? 'online' : 'local')
@@ -13,16 +19,16 @@ function LeaderboardPanel({ refreshKey, player, onChangePlayer }) {
 
   const load = useCallback(async () => {
     setLoading(true)
-    const result = await fetchTopScores(periodId)
+    const result = await fetchTopScores(periodId, room)
     setRows(result.rows)
     setMode(result.mode)
     setLoading(false)
-  }, [periodId])
+  }, [periodId, room])
 
   useEffect(() => {
     let alive = true
     ;(async () => {
-      const result = await fetchTopScores(periodId)
+      const result = await fetchTopScores(periodId, room)
       if (!alive) return
       setRows(result.rows)
       setMode(result.mode)
@@ -31,14 +37,16 @@ function LeaderboardPanel({ refreshKey, player, onChangePlayer }) {
     return () => {
       alive = false
     }
-  }, [periodId, refreshKey])
+  }, [periodId, room, refreshKey])
 
   const waiting = pendingCount()
 
   return (
     <aside className="card leaderboard">
       <div className="lb-header">
-        <h2 className="lb-title">순위표</h2>
+        <h2 className="lb-title">
+          {room === DEFAULT_ROOM ? '순위표' : '우리 반 순위표'}
+        </h2>
         <button
           type="button"
           className="lb-refresh"
@@ -98,11 +106,19 @@ function LeaderboardPanel({ refreshKey, player, onChangePlayer }) {
         {waiting > 0 && (
           <p className="lb-note lb-warn">보내지 못한 기록 {waiting}개 (연결되면 자동 전송)</p>
         )}
+        {room !== DEFAULT_ROOM && (
+          <p className="lb-room">
+            학급 코드 <strong>{room}</strong>
+          </p>
+        )}
         {player && (
           <button type="button" className="lb-player" onClick={onChangePlayer}>
             {player.nickname} <span>바꾸기</span>
           </button>
         )}
+        <button type="button" className="lb-room-btn" onClick={onChangeRoom}>
+          {room === DEFAULT_ROOM ? '학급 순위표 만들기' : '학급 코드 바꾸기'}
+        </button>
       </div>
     </aside>
   )

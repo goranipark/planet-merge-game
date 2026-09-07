@@ -9,9 +9,11 @@ import {
   MAX_SCORE,
   PERIODS,
   ALLOW_CUSTOM_NICKNAME,
+  DEFAULT_ROOM,
 } from './leaderboardConfig'
 import { isGeneratedNickname } from './nicknames'
 import { periodKeys } from './periods'
+import { isValidRoom } from './room'
 
 const LOCAL_SCORES_KEY = 'planet-merge-game:local-scores'
 const PENDING_KEY = 'planet-merge-game:pending-scores'
@@ -45,11 +47,12 @@ function periodField(periodId) {
 
 // 이상값 방어 (Data.md 7장) — 빈 값, 음수, 과도한 점수, 너무 긴 별명 차단
 // 개인정보 보호를 위해 별명 외의 정보(반, 이름 등)는 저장하지 않습니다.
-export function validateEntry({ nickname, score, stageReached }) {
+export function validateEntry({ nickname, score, stageReached, room }) {
   const cleanNickname = String(nickname ?? '')
     .trim()
     .slice(0, NICKNAME_MAX)
   const cleanScore = Math.floor(Number(score))
+  const cleanRoom = isValidRoom(room) ? room : DEFAULT_ROOM
 
   if (!cleanNickname) return { ok: false, reason: '별명이 비어 있습니다.' }
   if (!ALLOW_CUSTOM_NICKNAME && !isGeneratedNickname(cleanNickname))
@@ -65,6 +68,7 @@ export function validateEntry({ nickname, score, stageReached }) {
       nickname: cleanNickname,
       score: cleanScore,
       stageReached: String(stageReached ?? '').slice(0, 12),
+      room: cleanRoom, // 학급 코드 (없으면 'all' = 전체 순위표)
       ...periodKeys(), // 오늘/이번 주/이번 달 열쇠값 (초기화 주기는 RESET 설정을 따름)
     },
   }
@@ -102,14 +106,15 @@ async function submitToFirestore(entry) {
   })
 }
 
-async function fetchFromFirestore(periodId) {
+async function fetchFromFirestore(periodId, room) {
   const conn = await getFirestore()
   if (!conn) throw new Error('firebase-unavailable')
   const { db, fs } = conn
-  // 기간 열쇠값이 같은 기록 중 점수 상위 N개만 서버에서 바로 가져옵니다.
+  // 같은 학급 + 같은 기간의 기록 중 점수 상위 N개만 서버에서 바로 가져옵니다.
   // (예전처럼 최근 기록을 잔뜩 받아와 앱에서 고르지 않으므로, 기록이 많아도 1위를 놓치지 않습니다)
   const q = fs.query(
     fs.collection(db, 'scores'),
+    fs.where('room', '==', room),
     fs.where(periodField(periodId), '==', periodKeys()[periodField(periodId)]),
     fs.orderBy('score', 'desc'),
     fs.limit(TOP_LIMIT)
@@ -137,11 +142,13 @@ function submitToLocal(entry) {
   writeJson(LOCAL_SCORES_KEY, rows.slice(-500))
 }
 
-function fetchFromLocal(periodId) {
+function fetchFromLocal(periodId, room) {
   const field = periodField(periodId)
   const currentKey = periodKeys()[field]
   return readJson(LOCAL_SCORES_KEY, [])
-    .filter((row) => row[field] === currentKey)
+    .filter(
+      (row) => row[field] === currentKey && (row.room ?? DEFAULT_ROOM) === room
+    )
     .sort((a, b) => b.score - a.score)
     .slice(0, TOP_LIMIT)
 }
@@ -168,6 +175,8 @@ export async function flushPending() {
   for (const item of pending) {
     try {
       const { queuedAt, ...entry } = item
+      // 학급 코드 기능이 생기기 전에 쌓인 기록도 보낼 수 있도록 기본값 보정
+      if (!entry.room) entry.room = DEFAULT_ROOM
       await submitToFirestore(entry)
       sent++
     } catch {
@@ -203,13 +212,16 @@ export async function submitScore(raw) {
   }
 }
 
-export async function fetchTopScores(periodId) {
-  if (!isOnlineMode) return { rows: fetchFromLocal(periodId), mode: 'local' }
+export async function fetchTopScores(periodId, room = DEFAULT_ROOM) {
+  const target = isValidRoom(room) ? room : DEFAULT_ROOM
+  if (!isOnlineMode) {
+    return { rows: fetchFromLocal(periodId, target), mode: 'local' }
+  }
   try {
-    return { rows: await fetchFromFirestore(periodId), mode: 'online' }
+    return { rows: await fetchFromFirestore(periodId, target), mode: 'online' }
   } catch {
     // 인터넷이 끊겼을 때는 이 기기 기록이라도 보여줍니다
-    return { rows: fetchFromLocal(periodId), mode: 'offline' }
+    return { rows: fetchFromLocal(periodId, target), mode: 'offline' }
   }
 }
 

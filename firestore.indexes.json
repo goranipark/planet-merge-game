@@ -4,6 +4,7 @@
       "collectionGroup": "scores",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "room", "order": "ASCENDING" },
         { "fieldPath": "dayKey", "order": "ASCENDING" },
         { "fieldPath": "score", "order": "DESCENDING" }
       ]
@@ -12,6 +13,7 @@
       "collectionGroup": "scores",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "room", "order": "ASCENDING" },
         { "fieldPath": "weekKey", "order": "ASCENDING" },
         { "fieldPath": "score", "order": "DESCENDING" }
       ]
@@ -20,6 +22,7 @@
       "collectionGroup": "scores",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "room", "order": "ASCENDING" },
         { "fieldPath": "monthKey", "order": "ASCENDING" },
         { "fieldPath": "score", "order": "DESCENDING" }
       ]

@@ -46,7 +46,13 @@ export const RESET = {
   monthStartsOnDay: 1,
 }
 
-// [7] 순위표 기간 탭
+// [7] 학급 코드 (반별 순위표)
+// 선생님이 `게임주소?room=코드` 링크를 나눠주면 그 반 학생들끼리만 순위가 집계됩니다.
+// 코드가 없으면 모두가 함께 쓰는 전체 순위표를 사용합니다.
+export const DEFAULT_ROOM = 'all' // 전체 순위표를 뜻하는 값
+export const ROOM_MAX = 20 // 학급 코드 최대 길이
+
+// [8] 순위표 기간 탭
 // label 은 화면에 보이는 이름입니다. 필요 없는 탭은 지워도 됩니다.
 export const PERIODS = [
   { id: 'daily', label: '오늘', field: 'dayKey' },
