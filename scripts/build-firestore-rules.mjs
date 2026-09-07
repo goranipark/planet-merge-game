@@ -13,7 +13,7 @@ const repoRoot = resolve(here, '..')
 const rulesPath = resolve(repoRoot, 'firestore.rules')
 const nicknamesPath = resolve(repoRoot, 'planet-merge-game/src/game/nicknames.js')
 
-const { ADJECTIVES, NOUNS } = await import(`file://${nicknamesPath}`)
+const { ADJECTIVES, TRAITS, ANIMALS } = await import(`file://${nicknamesPath}`)
 
 // 정규식 특수문자가 섞여 들어가지 않도록 한글/영숫자만 허용
 const safe = (word) => {
@@ -23,7 +23,9 @@ const safe = (word) => {
   return word
 }
 
-const pattern = `^(${ADJECTIVES.map(safe).join('|')})(${NOUNS.map(safe).join('|')})$`
+// "성격 + 모습 + 동물" 세 낱말을 띄어쓰기로 이은 형태만 허용
+const group = (list) => `(${list.map(safe).join('|')})`
+const pattern = `^${group(ADJECTIVES)} ${group(TRAITS)} ${group(ANIMALS)}$`
 const line = `        && data.nickname.matches('${pattern}') // NICKNAME_PATTERN (자동 생성: npm run rules)`
 
 const rules = await readFile(rulesPath, 'utf8')
@@ -37,6 +39,7 @@ const updated = rules
   .join('\n')
 
 await writeFile(rulesPath, updated, 'utf8')
+const total = ADJECTIVES.length * TRAITS.length * ANIMALS.length
 console.log(
-  `firestore.rules 갱신 완료 — 허용 별명 ${ADJECTIVES.length} x ${NOUNS.length} = ${ADJECTIVES.length * NOUNS.length}가지`
+  `firestore.rules 갱신 완료 — 허용 별명 ${ADJECTIVES.length} x ${TRAITS.length} x ${ANIMALS.length} = ${total.toLocaleString('ko-KR')}가지`
 )

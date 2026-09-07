@@ -18,8 +18,10 @@ export const FIREBASE_CONFIG = {
 // [2] 리더보드에 보여줄 순위 개수 (design.md 기준 1~5위)
 export const TOP_LIMIT = 5
 
-// [3] 별명 최대 글자 수 (nicknames.js 의 조합이 최대 8글자)
-export const NICKNAME_MAX = 8
+// [3] 별명 최대 글자 수
+// nicknames.js 가 "성격 + 모습 + 동물" 세 낱말을 띄어쓰기로 이어 만들므로 넉넉히 잡습니다.
+// (예: "용감한 안경쓴 코끼리" = 12자)
+export const NICKNAME_MAX = 20
 
 // [4] 별명을 학생이 직접 입력하게 할지 여부
 // false(기본) = 미리 준비된 안전한 별명 중에서 고르기 → 부적절한 말이 올라올 수 없음
