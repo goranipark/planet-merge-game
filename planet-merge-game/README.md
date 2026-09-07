@@ -25,6 +25,16 @@ Web Audio API로 실시간 합성합니다. 외부에서 가져온 이미지·�
 
 **사용한 오픈소스**: Matter.js, React, Vite (모두 MIT) / 글꼴 Jua, Noto Sans KR (SIL OFL)
 
+## 이 저장소를 복사해서 쓰시는 분께 ⚠️
+
+이 저장소를 그대로 복사(fork)해 배포하면 **원본과 같은 순위표를 함께 쓰게 됩니다.**
+학교별로 따로 운영하시려면 둘 중 하나를 선택하세요.
+
+1. **순위표를 끄기** — `src/game/leaderboardConfig.js`의 `FIREBASE_CONFIG` 값을 모두 빈 문자열(`''`)로
+   두면 "이 기기에만 저장되는 연습용" 순위표로 동작합니다.
+2. **내 순위표 만들기** — [FIREBASE-설정안내.md](../FIREBASE-설정안내.md)를 따라 본인 Firebase 프로젝트를
+   만들고 그 설정값으로 교체하세요.
+
 ## 개발자용 안내
 
 ```bash
