@@ -74,7 +74,7 @@ export const RESET_ON_TAB_CLOSE = true
 //   false = 평소대로 두 게임 모두 열림
 //
 // ※ 여는 방법: 이 값을 false 로 바꾸고 다시 배포하면 됩니다.
-export const MAINTENANCE = true
+export const MAINTENANCE = false
 
 // 점검 중일 때 학생 화면에 보여줄 안내 (MAINTENANCE 가 true 일 때만 쓰임)
 export const MAINTENANCE_MESSAGE = {
