@@ -878,6 +878,8 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
+  /* 세로가 아주 짧은 화면에서 창이 잘리지 않도록 */
+  overflow-y: auto;
   animation: fade-in 0.25s ease-out;
 }
 
@@ -1140,4 +1142,183 @@
     width: 100%;
   }
   /* .jar 는 위에서 가로·세로를 함께 고려해 계산하므로 여기서 덮어쓰지 않습니다 */
+}
+
+/* ---------- 모드 선택 (첫 화면) ---------- */
+.mode-card {
+  max-width: 620px;
+}
+
+.mode-choices {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 16px 0 4px;
+}
+
+@media (max-width: 560px) {
+  .mode-choices {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mode-choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 18px 14px 16px;
+  border: 3px solid var(--card-border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-family: inherit;
+  text-align: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.1s ease, border-color 0.1s ease, background 0.1s ease;
+}
+
+.mode-choice:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgba(255, 213, 79, 0.1);
+  transform: translateY(-2px);
+}
+
+.mode-choice.is-current {
+  border-color: var(--accent);
+}
+
+.mode-emoji {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.mode-name {
+  font-family: var(--font-display);
+  font-size: 19px;
+  color: var(--accent);
+}
+
+.mode-tagline {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.mode-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 6px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--muted);
+  word-break: keep-all;
+}
+
+.mode-footnote {
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.mode-current-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--outline);
+  font-family: var(--font-display);
+  font-size: 11px;
+}
+
+/* --- 공사 중인 모드: 공사장 테이프로 막기 --- */
+.mode-choice.is-locked {
+  cursor: not-allowed;
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.mode-choice.is-locked > *:not(.mode-tape) {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+}
+
+.mode-tape {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  /* 노랑-검정 빗금 = 공사장 테이프 */
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 199, 44, 0.92) 0 16px,
+    rgba(38, 32, 20, 0.92) 16px 32px
+  );
+  border-top: 3px solid var(--outline);
+  border-bottom: 3px solid var(--outline);
+  /* 카드 전체가 아니라 띠 하나만 덮도록. 모드 이름은 위에 남겨 두어
+     "무엇이 준비 중인지"는 읽을 수 있게 합니다. */
+  top: 62%;
+  bottom: auto;
+  height: 62px;
+  transform: translateY(-50%) rotate(-7deg);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+}
+
+/* 빗금 위에서도 글씨가 읽히도록 어두운 판을 깔아 줍니다 */
+.mode-tape-text {
+  padding: 2px 14px;
+  border-radius: 999px;
+  border: 2px solid var(--outline);
+  background: rgba(18, 15, 10, 0.95);
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: #ffd54f;
+}
+
+.mode-tape-sub {
+  padding: 1px 10px;
+  border-radius: 999px;
+  background: rgba(18, 15, 10, 0.9);
+  font-size: 11px;
+  color: #f0ead8;
+}
+
+/* --- 제목 아래 현재 모드 표시 겸 전환 버튼 --- */
+.mode-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 4px 6px 4px 12px;
+  border: 2px solid var(--card-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.mode-chip:hover {
+  border-color: var(--accent);
+}
+
+.mode-chip-action {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--outline);
+  font-family: var(--font-display);
+  font-size: 11px;
 }

@@ -9,6 +9,7 @@ import {
 } from './game/storage'
 import { CONTAINER_WIDTH, CONTAINER_HEIGHT } from './game/config'
 import { getMode, DEFAULT_MODE_ID } from './game/modes'
+import { initMode, saveMode } from './game/modeStorage'
 import { loadPlayer, savePlayer } from './game/playerStorage'
 import { submitScore, flushPending } from './game/leaderboard'
 import { initRoom, saveRoom } from './game/room'
@@ -22,14 +23,11 @@ import PlanetGuide from './components/PlanetGuide'
 import LeaderboardPanel from './components/LeaderboardPanel'
 import NicknamePicker from './components/NicknamePicker'
 import RoomSetup from './components/RoomSetup'
+import ModeSelect from './components/ModeSelect'
 import SiteFooter from './components/SiteFooter'
 import './App.css'
 
 function App() {
-  // 지금은 크기 순서 모드 하나뿐입니다.
-  // 모드 선택 화면은 ToDo2.md 7번 단계에서 추가합니다.
-  const mode = getMode(DEFAULT_MODE_ID)
-
   const containerRef = useRef(null)
   const scoreRef = useRef(0)
   const audioRef = useRef(null)
@@ -55,6 +53,10 @@ function App() {
   const [lbRefreshKey, setLbRefreshKey] = useState(0)
   const [room, setRoom] = useState(() => initRoom())
   const [showRoomSetup, setShowRoomSetup] = useState(false)
+  // 고른 모드(없으면 null → 모드 선택 창이 뜸). 뒤에서 도는 게임은 기본 모드로 돌아갑니다.
+  const [modeId, setModeId] = useState(() => initMode())
+  const [showModeSelect, setShowModeSelect] = useState(() => initMode() === null)
+  const mode = getMode(modeId ?? DEFAULT_MODE_ID)
 
   playerRef.current = player
   roomRef.current = room
@@ -177,6 +179,14 @@ function App() {
     setLbRefreshKey((k) => k + 1)
   }
 
+  function handleSelectMode(nextId) {
+    saveMode(nextId)
+    setShowModeSelect(false)
+    if (nextId === modeId) return
+    setModeId(nextId)
+    setGameKey((k) => k + 1) // 모드가 바뀌면 새 판으로 시작
+  }
+
   function handleSavePlayer(next) {
     savePlayer(next)
     setPlayer(next)
@@ -202,6 +212,14 @@ function App() {
         <header className="title-area">
           <h1>🌟 행성 합치기 게임</h1>
           <p>마우스로 위치를 정하고 클릭하면 천체가 떨어져요. 같은 천체 둘이 만나면 더 큰 천체로 변신!</p>
+          <button
+            type="button"
+            className="mode-chip"
+            onClick={() => setShowModeSelect(true)}
+          >
+            <span aria-hidden="true">{mode.select.emoji}</span> {mode.name}
+            <span className="mode-chip-action">바꾸기</span>
+          </button>
         </header>
 
         <div className="hud">
@@ -259,7 +277,16 @@ function App() {
         <SiteFooter />
       </div>
 
-      {showSetup && (
+      {showModeSelect && (
+        <ModeSelect
+          current={modeId}
+          onSelect={handleSelectMode}
+          onCancel={modeId ? () => setShowModeSelect(false) : null}
+        />
+      )}
+
+      {/* 모드를 먼저 고르고, 그다음에 별명을 고릅니다 */}
+      {showSetup && !showModeSelect && (
         <NicknamePicker
           initial={player}
           onSave={handleSavePlayer}

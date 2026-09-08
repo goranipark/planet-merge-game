@@ -21,6 +21,13 @@ export const sizeMode = {
   getSprite,
   // 스프라이트 원본 크기 — 물리 반지름에 맞춰 축소·확대할 때 기준이 됩니다
   spriteDiscDiameter: SPRITE_DISC_DIAMETER,
+  // 모드 선택 화면에 보여줄 소개
+  select: {
+    emoji: '🪐',
+    tagline: '작은 것부터 큰 순서로',
+    lines: ['소행성 → 달 → 수성 → 화성 → 금성 →', '지구 → 해왕성 → … → 목성 → 태양'],
+    footnote: '11단계 · 실제 지름이 작은 것부터',
+  },
   // 화면 왼쪽 순서표 패널 문구
   guide: {
     title: '크기 순서표',
