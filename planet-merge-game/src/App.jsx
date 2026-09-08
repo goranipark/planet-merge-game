@@ -7,7 +7,12 @@ import {
   loadSeenStages,
   saveSeenStages,
 } from './game/storage'
-import { CONTAINER_WIDTH, CONTAINER_HEIGHT, ORDER_QUIZ } from './game/config'
+import {
+  CONTAINER_WIDTH,
+  CONTAINER_HEIGHT,
+  ORDER_QUIZ,
+  MAINTENANCE,
+} from './game/config'
 import { getMode, DEFAULT_MODE_ID } from './game/modes'
 import { initMode, saveMode } from './game/modeStorage'
 import { loadPlayer, savePlayer } from './game/playerStorage'
@@ -75,6 +80,7 @@ function App() {
 
   // 지난번에 인터넷 문제로 못 보낸 기록이 있으면 시작할 때 다시 전송
   useEffect(() => {
+    if (MAINTENANCE) return
     flushPending()
       .then((sent) => {
         if (sent > 0) setLbRefreshKey((k) => k + 1)
@@ -109,6 +115,8 @@ function App() {
     setSubmitState(null)
     setCleared(false)
     setShowRuler(false)
+
+    if (MAINTENANCE || !containerRef.current) return
 
     const audio = audioRef.current
     const game = createGame(containerRef.current, {
@@ -230,6 +238,23 @@ function App() {
     const next = !muted
     setMuted(next)
     audioRef.current.setMuted(next)
+  }
+
+  // 점검 중(config.js 의 MAINTENANCE)에는 게임을 아예 띄우지 않고 안내만 보여 줍니다.
+  // 순위표를 초기화하는 동안 기록이 섞이지 않도록 하기 위한 것입니다.
+  if (MAINTENANCE) {
+    return (
+      <>
+        <SpaceBackground />
+        <div id="game-page" className="is-maintenance">
+          <header className="title-area">
+            <h1>🌟 행성 합치기 게임</h1>
+          </header>
+          <SiteFooter />
+        </div>
+        <ModeSelect current={null} onSelect={() => {}} onCancel={null} />
+      </>
+    )
   }
 
   return (

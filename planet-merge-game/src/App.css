@@ -1654,3 +1654,14 @@
   color: var(--muted);
   word-break: keep-all;
 }
+
+/* 점검 중 화면 — 게임 없이 안내만 보여 주므로 저작권 표기를 아래로 내려 둡니다 */
+#game-page.is-maintenance {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#game-page.is-maintenance .site-footer {
+  margin-top: auto;
+}
