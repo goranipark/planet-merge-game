@@ -14,6 +14,7 @@ import {
 import { isGeneratedNickname } from './nicknames'
 import { periodKeys } from './periods'
 import { isValidRoom } from './room'
+import { MODES, DEFAULT_MODE_ID } from './modes'
 
 const LOCAL_SCORES_KEY = 'planet-merge-game:local-scores'
 const PENDING_KEY = 'planet-merge-game:pending-scores'
@@ -45,9 +46,15 @@ function periodField(periodId) {
   return period.field
 }
 
+// 저장되는 게임 모드 이름 (기록에는 gameMode 로 들어갑니다)
+// 이 파일 안의 mode() 는 "온라인/로컬" 을 뜻하므로 이름을 나누어 씁니다.
+function cleanGameMode(value) {
+  return MODES[value] ? value : DEFAULT_MODE_ID
+}
+
 // 이상값 방어 (Data.md 7장) — 빈 값, 음수, 과도한 점수, 너무 긴 별명 차단
 // 개인정보 보호를 위해 별명 외의 정보(반, 이름 등)는 저장하지 않습니다.
-export function validateEntry({ nickname, score, stageReached, room }) {
+export function validateEntry({ nickname, score, stageReached, room, gameMode }) {
   const cleanNickname = String(nickname ?? '')
     .trim()
     .slice(0, NICKNAME_MAX)
@@ -69,6 +76,8 @@ export function validateEntry({ nickname, score, stageReached, room }) {
       score: cleanScore,
       stageReached: String(stageReached ?? '').slice(0, 12),
       room: cleanRoom, // 학급 코드 (없으면 'all' = 전체 순위표)
+      // 어느 게임의 기록인지 — 크기 순서와 거리 순서는 점수 체계가 달라 순위표를 나눕니다
+      gameMode: cleanGameMode(gameMode),
       ...periodKeys(), // 오늘/이번 주/이번 달 열쇠값 (초기화 주기는 RESET 설정을 따름)
     },
   }
@@ -106,7 +115,7 @@ async function submitToFirestore(entry) {
   })
 }
 
-async function fetchFromFirestore(periodId, room) {
+async function fetchFromFirestore(periodId, room, gameMode) {
   const conn = await getFirestore()
   if (!conn) throw new Error('firebase-unavailable')
   const { db, fs } = conn
@@ -115,6 +124,7 @@ async function fetchFromFirestore(periodId, room) {
   const q = fs.query(
     fs.collection(db, 'scores'),
     fs.where('room', '==', room),
+    fs.where('gameMode', '==', gameMode),
     fs.where(periodField(periodId), '==', periodKeys()[periodField(periodId)]),
     fs.orderBy('score', 'desc'),
     fs.limit(TOP_LIMIT)
@@ -142,12 +152,15 @@ function submitToLocal(entry) {
   writeJson(LOCAL_SCORES_KEY, rows.slice(-500))
 }
 
-function fetchFromLocal(periodId, room) {
+function fetchFromLocal(periodId, room, gameMode) {
   const field = periodField(periodId)
   const currentKey = periodKeys()[field]
   return readJson(LOCAL_SCORES_KEY, [])
     .filter(
-      (row) => row[field] === currentKey && (row.room ?? DEFAULT_ROOM) === room
+      (row) =>
+        row[field] === currentKey &&
+        (row.room ?? DEFAULT_ROOM) === room &&
+        (row.gameMode ?? DEFAULT_MODE_ID) === gameMode
     )
     .sort((a, b) => b.score - a.score)
     .slice(0, TOP_LIMIT)
@@ -175,8 +188,9 @@ export async function flushPending() {
   for (const item of pending) {
     try {
       const { queuedAt, ...entry } = item
-      // 학급 코드 기능이 생기기 전에 쌓인 기록도 보낼 수 있도록 기본값 보정
+      // 학급 코드·모드 기능이 생기기 전에 쌓인 기록도 보낼 수 있도록 기본값 보정
       if (!entry.room) entry.room = DEFAULT_ROOM
+      if (!entry.gameMode) entry.gameMode = DEFAULT_MODE_ID
       await submitToFirestore(entry)
       sent++
     } catch {
@@ -212,16 +226,24 @@ export async function submitScore(raw) {
   }
 }
 
-export async function fetchTopScores(periodId, room = DEFAULT_ROOM) {
+export async function fetchTopScores(
+  periodId,
+  room = DEFAULT_ROOM,
+  gameMode = DEFAULT_MODE_ID
+) {
   const target = isValidRoom(room) ? room : DEFAULT_ROOM
+  const game = cleanGameMode(gameMode)
   if (!isOnlineMode) {
-    return { rows: fetchFromLocal(periodId, target), mode: 'local' }
+    return { rows: fetchFromLocal(periodId, target, game), mode: 'local' }
   }
   try {
-    return { rows: await fetchFromFirestore(periodId, target), mode: 'online' }
+    return {
+      rows: await fetchFromFirestore(periodId, target, game),
+      mode: 'online',
+    }
   } catch {
     // 인터넷이 끊겼을 때는 이 기기 기록이라도 보여줍니다
-    return { rows: fetchFromLocal(periodId, target), mode: 'offline' }
+    return { rows: fetchFromLocal(periodId, target, game), mode: 'offline' }
   }
 }
 

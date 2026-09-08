@@ -181,6 +181,7 @@ function App() {
       score: scoreRef.current,
       stageReached: stageName,
       room: roomRef.current,
+      gameMode: mode.id, // 크기 순서·거리 순서 순위표를 따로 집계
     })
     setSubmitState(result.status)
     setLbRefreshKey((k) => k + 1)
@@ -311,6 +312,7 @@ function App() {
           </div>
 
           <LeaderboardPanel
+            gameMode={mode}
             refreshKey={lbRefreshKey}
             player={player}
             onChangePlayer={() => setShowSetup(true)}

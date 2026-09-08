@@ -6,6 +6,7 @@ import { nextResetText } from '../game/periods'
 const MEDALS = ['🥇', '🥈', '🥉']
 
 function LeaderboardPanel({
+  gameMode,
   refreshKey,
   player,
   onChangePlayer,
@@ -19,16 +20,16 @@ function LeaderboardPanel({
 
   const load = useCallback(async () => {
     setLoading(true)
-    const result = await fetchTopScores(periodId, room)
+    const result = await fetchTopScores(periodId, room, gameMode.id)
     setRows(result.rows)
     setMode(result.mode)
     setLoading(false)
-  }, [periodId, room])
+  }, [periodId, room, gameMode.id])
 
   useEffect(() => {
     let alive = true
     ;(async () => {
-      const result = await fetchTopScores(periodId, room)
+      const result = await fetchTopScores(periodId, room, gameMode.id)
       if (!alive) return
       setRows(result.rows)
       setMode(result.mode)
@@ -37,7 +38,7 @@ function LeaderboardPanel({
     return () => {
       alive = false
     }
-  }, [periodId, room, refreshKey])
+  }, [periodId, room, gameMode.id, refreshKey])
 
   const waiting = pendingCount()
 
@@ -57,6 +58,10 @@ function LeaderboardPanel({
           ↻
         </button>
       </div>
+
+      <p className="lb-mode">
+        <span aria-hidden="true">{gameMode.select.emoji}</span> {gameMode.name} 기록
+      </p>
 
       <div className="lb-tabs" role="tablist">
         {PERIODS.map((p) => (

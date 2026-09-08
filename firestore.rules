@@ -23,7 +23,11 @@ service cloud.firestore {
     // 개인정보 보호: 별명·점수·도달 천체·시각·기간열쇠만 저장하며, 그 외 필드는 아예 거부합니다.
     // (dayKey/weekKey/monthKey = 어느 기간 순위에 속하는지 나타내는 값. 초기화 주기 설정에 사용)
     function isValidScore(data) {
-      return data.keys().hasOnly(['nickname', 'score', 'stageReached', 'createdAt', 'dayKey', 'weekKey', 'monthKey', 'room'])
+      return data.keys().hasOnly(['nickname', 'score', 'stageReached', 'createdAt', 'dayKey', 'weekKey', 'monthKey', 'room', 'gameMode'])
+        // 어느 게임의 기록인지 (size = 크기 순서 / distance = 거리 순서).
+        // 없어도 통과시킵니다 — 규칙을 새로 올리는 순간 게임 화면을 켜 두고 있던 학생의
+        // 기록이 거부되지 않도록 하기 위해서입니다. (그런 기록은 순위표에 안 보일 뿐입니다)
+        && (!('gameMode' in data) || (data.gameMode is string && data.gameMode in ['size', 'distance']))
         // 학급 코드: 영문 소문자·숫자·하이픈 2~20자 ('all' = 전체 순위표)
         && data.room is string
         && data.room.matches('^[a-z0-9][a-z0-9-]{0,18}[a-z0-9]$')
