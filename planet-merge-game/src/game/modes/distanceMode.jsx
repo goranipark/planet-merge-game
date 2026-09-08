@@ -43,6 +43,27 @@ export const distanceMode = {
   // 그림 안에 글자를 넣으면 공이 구를 때 글자도 돌아가므로, 엔진이 화면 위에 똑바로 그립니다.
   label: (stage) => `${stage + 1} ${ORBITS[stage].name}`,
 
+  // 순서 퀴즈 (concept2.md 5-1) — 정보 카드를 보여주기 전에 순서를 한 번 묻습니다.
+  // 보기는 정답 + 순서상 가장 가까운 행성 2개로 만듭니다.
+  // 멀리 떨어진 행성을 보기로 주면 너무 쉬워서, 이웃한 행성끼리 헷갈리게 두었습니다.
+  quiz: (stage) => {
+    if (stage < 1) return null // 합쳐서 만든 궤도만 물어봅니다
+    const 앞 = ORBITS[stage - 1]
+    const 정답 = ORBITS[stage]
+    const 오답 = ORBITS.filter((o) => o.id !== stage && o.id !== stage - 1)
+      .sort((a, b) => Math.abs(a.id - stage) - Math.abs(b.id - stage))
+      .slice(0, 2)
+    const 보기 = [정답, ...오답]
+      .map((o) => o.name)
+      .sort(() => Math.random() - 0.5)
+    return {
+      question: `${앞.name} 다음으로 태양에서 먼 행성은?`,
+      options: 보기,
+      answer: 정답.name,
+      hint: `${앞.name} 다음은 ${정답.name}이에요. 수-금-지-화-목-토-천-해!`,
+    }
+  },
+
   // 정보 카드에 무엇을 보여줄지 — 거리 순서 모드는 "거리"가 주인공입니다
   card: {
     badge: '✨ 새로운 궤도 발견!',

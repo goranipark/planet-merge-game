@@ -7,7 +7,7 @@ import {
   loadSeenStages,
   saveSeenStages,
 } from './game/storage'
-import { CONTAINER_WIDTH, CONTAINER_HEIGHT } from './game/config'
+import { CONTAINER_WIDTH, CONTAINER_HEIGHT, ORDER_QUIZ } from './game/config'
 import { getMode, DEFAULT_MODE_ID } from './game/modes'
 import { initMode, saveMode } from './game/modeStorage'
 import { loadPlayer, savePlayer } from './game/playerStorage'
@@ -197,6 +197,18 @@ function App() {
     setShowSetup(false)
   }
 
+  // 퀴즈를 맞히면 보너스 점수 (해당 단계 점수의 절반)
+  function handleQuizCorrect(bonus) {
+    scoreRef.current += bonus
+    setScore(scoreRef.current)
+    setBest((prevBest) => {
+      if (scoreRef.current <= prevBest) return prevBest
+      saveBestScore(scoreRef.current)
+      return scoreRef.current
+    })
+    audioRef.current.play('merge', { stage: 9 }) // 밝은 칭찬음
+  }
+
   function closeCard() {
     const rest = cardQueue.slice(1)
     setCardQueue(rest)
@@ -265,6 +277,9 @@ function App() {
                 mode={mode}
                 stage={cardQueue[0]}
                 remaining={cardQueue.length - 1}
+                quiz={ORDER_QUIZ ? (mode.quiz?.(cardQueue[0]) ?? null) : null}
+                bonus={Math.round((mode.mergeScores[cardQueue[0]] ?? 0) * 0.5)}
+                onCorrect={handleQuizCorrect}
                 onClose={closeCard}
               />
             )}

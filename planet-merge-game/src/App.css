@@ -1367,3 +1367,64 @@
 .clear-banner button:hover {
   color: var(--text);
 }
+
+/* ---------- 순서 퀴즈 (거리 순서 게임) ---------- */
+.quiz-question {
+  margin: 1em 0 0.9em;
+  font-family: var(--font-display);
+  font-size: 1.25em;
+  line-height: 1.4;
+  color: var(--accent);
+  word-break: keep-all;
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.quiz-option {
+  padding: 0.65em 0.8em;
+  border: 2px solid var(--card-border);
+  border-radius: 0.9em;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 1.15em;
+  cursor: pointer;
+  transition: transform 0.08s ease, border-color 0.08s ease, background 0.08s ease;
+}
+
+.quiz-option:hover {
+  border-color: var(--accent);
+  background: rgba(255, 213, 79, 0.12);
+  transform: translateY(-1px);
+}
+
+.quiz-option:active {
+  transform: translateY(1px);
+}
+
+.quiz-note {
+  margin-top: 0.85em;
+  font-size: 0.85em;
+  color: var(--muted);
+  word-break: keep-all;
+}
+
+.quiz-result {
+  margin: 0.6em 0 0.2em;
+  padding: 0.45em 0.7em;
+  border-radius: 0.7em;
+  background: rgba(255, 138, 128, 0.14);
+  color: #ffd9d4;
+  font-size: 0.9em;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
+.quiz-result.is-correct {
+  background: rgba(158, 228, 147, 0.16);
+  color: #c9f5c0;
+}
