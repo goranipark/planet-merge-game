@@ -23,6 +23,7 @@ import PlanetGuide from './components/PlanetGuide'
 import LeaderboardPanel from './components/LeaderboardPanel'
 import NicknamePicker from './components/NicknamePicker'
 import RoomSetup from './components/RoomSetup'
+import DistanceRuler from './components/DistanceRuler'
 import ModeSelect from './components/ModeSelect'
 import SiteFooter from './components/SiteFooter'
 import './App.css'
@@ -57,6 +58,7 @@ function App() {
   const [modeId, setModeId] = useState(() => initMode())
   const [showModeSelect, setShowModeSelect] = useState(() => initMode() === null)
   const [cleared, setCleared] = useState(false) // 마지막 단계까지 만들었는지
+  const [showRuler, setShowRuler] = useState(false) // 실제 거리 보기 화면
   const mode = getMode(modeId ?? DEFAULT_MODE_ID)
 
   playerRef.current = player
@@ -106,6 +108,7 @@ function App() {
     setMaxStage(-1)
     setSubmitState(null)
     setCleared(false)
+    setShowRuler(false)
 
     const audio = audioRef.current
     const game = createGame(containerRef.current, {
@@ -126,7 +129,14 @@ function App() {
         maxStageRef.current = Math.max(maxStageRef.current, stage)
         setMaxStage((prev) => Math.max(prev, stage))
         // 마지막 단계(태양 / 해왕성 궤도)를 만들면 완성
-        if (stage === mode.stages.length - 1) setCleared(true)
+        if (stage === mode.stages.length - 1) {
+          setCleared(true)
+          // 완성하면 실제 거리 화면으로 마무리 (거리 순서 게임만)
+          if (mode.hasDistanceRuler) {
+            setShowRuler(true)
+            game.pause()
+          }
+        }
         // 처음 만든 천체면 게임을 멈추고 정보 카드 표시
         if (seenStagesRef.current.has(stage)) return
         seenStagesRef.current.add(stage)
@@ -254,7 +264,14 @@ function App() {
         </div>
 
         <div className="play-area">
-          <PlanetGuide mode={mode} maxStage={maxStage} />
+          <PlanetGuide
+            mode={mode}
+            maxStage={maxStage}
+            onShowRuler={() => {
+              setShowRuler(true)
+              gameRef.current?.pause()
+            }}
+          />
 
           <div
             id="game-container-wrapper"
@@ -319,6 +336,16 @@ function App() {
           initial={player}
           onSave={handleSavePlayer}
           onCancel={player ? () => setShowSetup(false) : null}
+        />
+      )}
+
+      {showRuler && (
+        <DistanceRuler
+          onClose={() => {
+            setShowRuler(false)
+            // 정보 카드가 남아 있으면 그 카드가 닫힐 때 이어서 재개합니다
+            if (cardQueue.length === 0) gameRef.current?.resume()
+          }}
         />
       )}
 

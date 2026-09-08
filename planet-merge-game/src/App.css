@@ -1428,3 +1428,220 @@
   background: rgba(158, 228, 147, 0.16);
   color: #c9f5c0;
 }
+
+/* ---------- 엔딩 거리자 ---------- */
+.ruler-card {
+  max-width: 680px;
+}
+
+.ruler-tabs {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin: 14px 0 6px;
+}
+
+.ruler-tab {
+  padding: 5px 14px;
+  border: 2px solid var(--card-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.ruler-tab.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--outline);
+}
+
+.ruler {
+  position: relative;
+  height: 132px;
+  margin: 6px 0 4px;
+}
+
+.ruler-line {
+  position: absolute;
+  left: 4%;
+  right: 2%;
+  top: 50%;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(255, 213, 79, 0.7), rgba(255, 255, 255, 0.18));
+}
+
+.ruler-sun {
+  position: absolute;
+  left: 4%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 26px;
+  line-height: 1;
+  text-shadow: 0 0 14px rgba(255, 213, 79, 0.8);
+}
+
+.ruler-mark {
+  position: absolute;
+  top: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ruler-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--outline);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.25);
+}
+
+.ruler-tick {
+  width: 2px;
+  height: 22px;
+  opacity: 0.55;
+}
+
+.ruler-name {
+  font-size: 11.5px;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+/* 이름표가 겹치지 않도록 위·아래로 번갈아 배치 */
+.ruler-mark.is-up {
+  flex-direction: column-reverse;
+  transform: translate(-50%, -100%);
+  padding-bottom: 5px;
+}
+
+.ruler-mark.is-down {
+  transform: translate(-50%, 0);
+  padding-top: 5px;
+}
+
+.ruler-mark.is-up .ruler-dot,
+.ruler-mark.is-down .ruler-dot {
+  margin: 1px 0;
+}
+
+.ruler-end {
+  /* 마지막 행성 이름표와 겹치지 않도록 오른쪽 위 구석에 둡니다 */
+  position: absolute;
+  right: 0;
+  top: 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.ruler-point {
+  margin: 2px 0 12px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text);
+  word-break: keep-all;
+}
+
+.ruler-light {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ruler-light > div {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 8px 6px;
+}
+
+.ruler-light dt {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.ruler-light dd {
+  margin: 3px 0 0;
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--accent);
+}
+
+.ruler-pluto {
+  font-size: 12.5px;
+}
+
+/* 순서표 패널 아래 "실제 거리 보기" 버튼 */
+.guide-ruler-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 7px 8px;
+  border: 2px solid var(--card-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  cursor: pointer;
+  word-break: keep-all;
+}
+
+.guide-ruler-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+@media (max-width: 560px) {
+  .ruler-light {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 전체 보기에서 왼쪽 끝에 뭉쳐 있는 안쪽 네 행성 */
+.ruler-mark.is-crowded {
+  padding-top: 0;
+  transform: translate(-50%, -50%);
+}
+
+.ruler-cluster {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, 0);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 14px;
+}
+
+.ruler-cluster-brace {
+  position: absolute;
+  top: 2px;
+  width: 30px;
+  height: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+}
+
+.ruler-cluster-name {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.ruler-cluster-name em {
+  font-family: var(--font-body, inherit);
+  font-style: normal;
+  font-size: 10.5px;
+  color: var(--muted);
+}

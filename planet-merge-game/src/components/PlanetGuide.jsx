@@ -11,7 +11,7 @@ function displaySize(stages, radius) {
 }
 
 // 제목·안내 문구·목록은 모드가 정합니다 (game/modes/ 참고)
-function PlanetGuide({ mode, maxStage = -1 }) {
+function PlanetGuide({ mode, maxStage = -1, onShowRuler }) {
   return (
     <aside className="card planet-guide">
       <h2 className="guide-title">{mode.guide.title}</h2>
@@ -40,6 +40,13 @@ function PlanetGuide({ mode, maxStage = -1 }) {
           )
         })}
       </ol>
+
+      {/* 거리 순서 게임에서만: 수업 정리용으로 언제든 실제 거리를 볼 수 있게 */}
+      {mode.hasDistanceRuler && onShowRuler && (
+        <button type="button" className="guide-ruler-btn" onClick={onShowRuler}>
+          🔭 실제 거리 보기
+        </button>
+      )}
     </aside>
   )
 }
