@@ -421,6 +421,8 @@ export function createGame(
       ctx.globalAlpha = pointerInside ? 0.9 : 0.6
       ctx.drawImage(img, x - w / 2, SPAWN_Y - h / 2, w, h)
       ctx.restore()
+      // 떨어뜨리기 전에도 무엇이 나올지 이름으로 확인할 수 있게
+      if (mode.label) drawLabel(ctx, mode.label(currentStage), x, SPAWN_Y, radius)
     }
   }
 
@@ -471,10 +473,36 @@ export function createGame(
     ctx.restore()
   }
 
+  // 공 위의 이름표 (예: "3 지구")
+  // 그림 안에 글자를 넣으면 공이 구를 때 글자도 뒤집히므로, 여기서 화면 기준으로 똑바로 그립니다.
+  function drawLabel(ctx, text, x, y, radius) {
+    const size = Math.max(9, Math.min(13, radius * 0.3))
+    ctx.save()
+    ctx.font = `bold ${size}px system-ui, sans-serif`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.lineJoin = 'round'
+    ctx.lineWidth = Math.max(3, size * 0.5)
+    ctx.strokeStyle = 'rgba(10, 8, 22, 0.95)'
+    ctx.strokeText(text, x, y + radius * 0.58)
+    ctx.fillStyle = '#ffffff'
+    ctx.fillText(text, x, y + radius * 0.58)
+    ctx.restore()
+  }
+
+  function drawLabels(ctx) {
+    if (!mode.label) return // 이름표를 쓰지 않는 모드(크기 순서 게임)는 건너뜁니다
+    for (const b of engine.world.bodies) {
+      if (b.isStatic || b.gameStage == null) continue
+      drawLabel(ctx, mode.label(b.gameStage), b.position.x, b.position.y, b.circleRadius)
+    }
+  }
+
   function handleAfterRender() {
     const ctx = render.context
     drawGameOverLine(ctx)
     drawAimPreview(ctx)
+    drawLabels(ctx)
     drawParticles(ctx)
   }
 

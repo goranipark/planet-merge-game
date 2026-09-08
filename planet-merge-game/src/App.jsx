@@ -56,6 +56,7 @@ function App() {
   // 고른 모드(없으면 null → 모드 선택 창이 뜸). 뒤에서 도는 게임은 기본 모드로 돌아갑니다.
   const [modeId, setModeId] = useState(() => initMode())
   const [showModeSelect, setShowModeSelect] = useState(() => initMode() === null)
+  const [cleared, setCleared] = useState(false) // 마지막 단계까지 만들었는지
   const mode = getMode(modeId ?? DEFAULT_MODE_ID)
 
   playerRef.current = player
@@ -104,6 +105,7 @@ function App() {
     setCardQueue([])
     setMaxStage(-1)
     setSubmitState(null)
+    setCleared(false)
 
     const audio = audioRef.current
     const game = createGame(containerRef.current, {
@@ -123,6 +125,8 @@ function App() {
       onMerge: (stage) => {
         maxStageRef.current = Math.max(maxStageRef.current, stage)
         setMaxStage((prev) => Math.max(prev, stage))
+        // 마지막 단계(태양 / 해왕성 궤도)를 만들면 완성
+        if (stage === mode.stages.length - 1) setCleared(true)
         // 처음 만든 천체면 게임을 멈추고 정보 카드 표시
         if (seenStagesRef.current.has(stage)) return
         seenStagesRef.current.add(stage)
@@ -221,6 +225,15 @@ function App() {
             <span className="mode-chip-action">바꾸기</span>
           </button>
         </header>
+
+        {cleared && (
+          <div className="clear-banner">
+            <span>🎉 {mode.stages[mode.stages.length - 1].name}까지 만들었어요! 완성!</span>
+            <button type="button" onClick={() => setCleared(false)} aria-label="닫기">
+              ×
+            </button>
+          </div>
+        )}
 
         <div className="hud">
           <ScoreBoard score={score} best={best} />

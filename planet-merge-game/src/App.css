@@ -1322,3 +1322,48 @@
   font-family: var(--font-display);
   font-size: 11px;
 }
+
+/* 정보 카드 안의 오개념 주의 문구 (예: 해왕성의 궤도 vs 실제 크기) */
+.info-warn {
+  margin-top: 0.55em;
+  padding: 0.5em 0.7em;
+  border-radius: 0.6em;
+  background: rgba(255, 138, 128, 0.12);
+  border-left: 4px solid #ff8a80;
+  font-size: 0.88em;
+  line-height: 1.45;
+  text-align: left;
+  color: #ffd9d4;
+  word-break: keep-all;
+}
+
+/* 마지막 단계까지 만들었을 때 뜨는 알림 (엔딩 화면은 ToDo2.md 7번에서) */
+.clear-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 8px auto 0;
+  padding: 7px 14px;
+  max-width: 520px;
+  border: 2px solid var(--accent);
+  border-radius: 999px;
+  background: rgba(255, 213, 79, 0.14);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 14px;
+  word-break: keep-all;
+}
+
+.clear-banner button {
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.clear-banner button:hover {
+  color: var(--text);
+}

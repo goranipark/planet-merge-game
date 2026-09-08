@@ -8,6 +8,21 @@ import { STAGES } from '../objects'
 import { getSprite, SPRITE_DISC_DIAMETER } from '../sprites'
 import { MODE_TUNING } from '../config'
 
+// 지구 지름(km) — "지구의 몇 배"를 계산하는 기준값
+const EARTH_KM = 12742
+
+// 지구와 크기 비교 문구
+function compareToEarth(diameterKm) {
+  const ratio = diameterKm / EARTH_KM
+  if (Math.abs(ratio - 1) < 0.01) return '우리가 사는 지구예요'
+  if (ratio > 1) {
+    const n = ratio >= 10 ? Math.round(ratio) : Math.round(ratio * 10) / 10
+    return `지구보다 약 ${n}배 커요`
+  }
+  if (ratio >= 0.1) return `지구의 약 ${Math.round(ratio * 10) / 10}배 크기예요`
+  return `지구의 약 ${Math.round(1 / ratio)}분의 1 크기예요`
+}
+
 export const sizeMode = {
   id: 'size',
   name: '크기 순서 게임',
@@ -27,6 +42,14 @@ export const sizeMode = {
     tagline: '작은 것부터 큰 순서로',
     lines: ['소행성 → 달 → 수성 → 화성 → 금성 →', '지구 → 해왕성 → … → 목성 → 태양'],
     footnote: '11단계 · 실제 지름이 작은 것부터',
+  },
+  // 정보 카드에 무엇을 보여줄지
+  card: {
+    badge: '✨ 새로운 천체 발견!',
+    stats: (def) => [
+      { label: '실제 지름', value: `약 ${def.diameterKm.toLocaleString('ko-KR')} km` },
+      { label: '크기 비교', value: compareToEarth(def.diameterKm) },
+    ],
   },
   // 화면 왼쪽 순서표 패널 문구
   guide: {

@@ -1,25 +1,16 @@
-// 지구 지름(km) — 모드와 상관없이 "지구의 몇 배"를 계산하는 기준값입니다
-const EARTH_KM = 12742
-
-// 지구와 크기 비교 문구
-function compareToEarth(diameterKm) {
-  const ratio = diameterKm / EARTH_KM
-  if (Math.abs(ratio - 1) < 0.01) return '우리가 사는 지구예요'
-  if (ratio > 1) {
-    const n = ratio >= 10 ? Math.round(ratio) : Math.round(ratio * 10) / 10
-    return `지구보다 약 ${n}배 커요`
-  }
-  if (ratio >= 0.1) return `지구의 약 ${Math.round(ratio * 10) / 10}배 크기예요`
-  return `지구의 약 ${Math.round(1 / ratio)}분의 1 크기예요`
-}
-
+// 새로운 천체(궤도)를 처음 만들었을 때 뜨는 교육 카드
+//
+// 카드에 무엇을 보여줄지는 모드가 정합니다 (game/modes/ 의 card).
+//   크기 순서 게임 → 실제 지름과 지구와의 크기 비교
+//   거리 순서 게임 → 태양까지 거리와 지구와의 거리 비교
 function InfoCard({ mode, stage, remaining, onClose }) {
   const def = mode.stages[stage]
+  const card = mode.card
 
   return (
     <div className="info-backdrop">
       <div className="info-card">
-        <div className="info-badge">✨ 새로운 천체 발견!</div>
+        <div className="info-badge">{card.badge}</div>
         <img
           className="info-sprite"
           src={mode.getSprite(stage, 'happy')}
@@ -31,14 +22,12 @@ function InfoCard({ mode, stage, remaining, onClose }) {
         <p className="info-desc">{def.description}</p>
 
         <dl className="info-stats">
-          <div>
-            <dt>실제 지름</dt>
-            <dd>약 {def.diameterKm.toLocaleString('ko-KR')} km</dd>
-          </div>
-          <div>
-            <dt>크기 비교</dt>
-            <dd>{compareToEarth(def.diameterKm)}</dd>
-          </div>
+          {card.stats(def).map((s) => (
+            <div key={s.label}>
+              <dt>{s.label}</dt>
+              <dd>{s.value}</dd>
+            </div>
+          ))}
         </dl>
 
         <p className="info-fact">
@@ -46,11 +35,14 @@ function InfoCard({ mode, stage, remaining, onClose }) {
           {def.fact}
         </p>
 
+        {/* 오개념을 짚어 주는 문구가 있는 천체에만 표시 (예: 해왕성의 궤도 vs 크기) */}
+        {def.sizeNote && <p className="info-warn">⚠️ {def.sizeNote}</p>}
+
         <button type="button" className="btn-primary" onClick={onClose}>
           알겠어요!
         </button>
         {remaining > 0 && (
-          <p className="info-remaining">새 천체 카드가 {remaining}장 더 있어요</p>
+          <p className="info-remaining">새 카드가 {remaining}장 더 있어요</p>
         )}
       </div>
     </div>
