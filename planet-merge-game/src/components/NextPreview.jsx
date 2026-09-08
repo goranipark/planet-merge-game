@@ -1,15 +1,12 @@
-import { STAGES } from '../game/objects'
-import { getSprite } from '../game/sprites'
-
-function NextPreview({ stage }) {
-  const def = STAGES[stage]
+function NextPreview({ mode, stage }) {
+  const def = mode.stages[stage]
 
   return (
     <div className="card next-preview">
       <span className="label">다음 차례</span>
       <img
         className="next-preview-sprite"
-        src={getSprite(stage)}
+        src={mode.getSprite(stage)}
         alt={def.name}
         width={48}
         height={48}

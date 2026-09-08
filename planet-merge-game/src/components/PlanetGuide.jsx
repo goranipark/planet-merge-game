@@ -1,30 +1,25 @@
-import { STAGES } from '../game/objects'
-import { getSprite } from '../game/sprites'
-
 // 목록에 표시할 그림 크기(px). 실제 게임 크기 비율을 유지하되,
-// 소행성이 너무 작아 안 보이지 않도록 최소/최대값 안에서 조절합니다.
+// 가장 작은 것이 너무 작아 안 보이지 않도록 최소/최대값 안에서 조절합니다.
 const MIN_SIZE = 20
 const MAX_SIZE = 42
 
-function displaySize(radius) {
-  const smallest = STAGES[0].radius
-  const largest = STAGES[STAGES.length - 1].radius
+function displaySize(stages, radius) {
+  const smallest = stages[0].radius
+  const largest = stages[stages.length - 1].radius
   const t = (radius - smallest) / (largest - smallest)
   return Math.round(MIN_SIZE + t * (MAX_SIZE - MIN_SIZE))
 }
 
-function PlanetGuide({ maxStage = -1 }) {
+// 제목·안내 문구·목록은 모드가 정합니다 (game/modes/ 참고)
+function PlanetGuide({ mode, maxStage = -1 }) {
   return (
     <aside className="card planet-guide">
-      <h2 className="guide-title">크기 순서표</h2>
-      <p className="guide-hint">같은 천체 2개 → 다음 천체</p>
-      <p className="guide-note">
-        실제 <strong>지름이 작은 것부터 큰 순서</strong>예요.
-        태양에서 가까운 순서(태양계 배열)가 아니에요!
-      </p>
+      <h2 className="guide-title">{mode.guide.title}</h2>
+      <p className="guide-hint">{mode.guide.hint}</p>
+      <p className="guide-note">{mode.guide.note}</p>
       <ol className="guide-list">
-        {STAGES.map((stage, index) => {
-          const size = displaySize(stage.radius)
+        {mode.stages.map((stage, index) => {
+          const size = displaySize(mode.stages, stage.radius)
           const found = index <= maxStage
           return (
             <li
@@ -34,7 +29,7 @@ function PlanetGuide({ maxStage = -1 }) {
               <span className="guide-num">{index + 1}</span>
               <span className="guide-icon">
                 <img
-                  src={getSprite(stage.id)}
+                  src={mode.getSprite(stage.id)}
                   alt=""
                   width={size}
                   height={size}

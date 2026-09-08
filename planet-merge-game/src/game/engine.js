@@ -1,12 +1,7 @@
 import Matter from 'matter-js'
-import { STAGES } from './objects'
 import { canMerge, getNextStage, mergeScore } from './mergeLogic'
-import {
-  getSprite,
-  SPRITE_DISC_DIAMETER,
-  EXPRESSIONS,
-  IDLE_EXPRESSIONS,
-} from './sprites'
+import { EXPRESSIONS, IDLE_EXPRESSIONS } from './sprites'
+import { getMode, DEFAULT_MODE_ID } from './modes'
 import {
   CONTAINER_WIDTH,
   CONTAINER_HEIGHT,
@@ -17,7 +12,6 @@ import {
   GAME_OVER_HOLD_MS,
   SPAWN_GRACE_MS,
   DROP_COOLDOWN_MS,
-  SPAWN_POOL_SIZE,
   GRAVITY_Y,
   RESTITUTION,
   FRICTION,
@@ -36,93 +30,102 @@ const IDLE_CHANGE_MIN_MS = 2500 // 대기 표정이 바뀌는 최소 간격
 const IDLE_CHANGE_RANGE_MS = 4500 // 여기에 랜덤으로 더해짐
 const LAND_SFX_MIN_GAP_MS = 70 // 착지음이 한꺼번에 겹쳐 울리지 않도록 최소 간격
 
-function stageRadius(stage) {
-  return STAGES[stage].radius * SIZE_SCALE
-}
-
-function randomSpawnStage() {
-  return Math.floor(Math.random() * SPAWN_POOL_SIZE)
-}
-
 function pickIdleExpression(exclude) {
   const pool = IDLE_EXPRESSIONS.filter((e) => e !== exclude)
   return pool[Math.floor(Math.random() * pool.length)]
 }
 
-function createStageBody(stage, x, y, expression = 'normal') {
-  const radius = stageRadius(stage)
-  const scale = (radius * 2) / SPRITE_DISC_DIAMETER
-  const body = Bodies.circle(x, y, radius, {
-    restitution: RESTITUTION,
-    friction: FRICTION,
-    frictionStatic: FRICTION_STATIC,
-    density: DENSITY,
-    render: {
-      sprite: {
-        texture: getSprite(stage, expression),
-        xScale: scale,
-        yScale: scale,
-      },
-    },
-  })
-  body.gameStage = stage
-  body.spawnedAt = null // 첫 프레임에 기록 (게임오버 판정의 유예 시간 계산용)
-  body.countsForGameOver = false
-  body.face = {
-    current: expression,
-    idle: 'normal',
-    overrideExpr: null,
-    overrideUntil: 0,
-    nextIdleChangeAt: 0,
-  }
-  return body
-}
-
-function setExpression(body, expression) {
-  if (body.face.current === expression) return
-  body.face.current = expression
-  body.render.sprite.texture = getSprite(body.gameStage, expression)
-}
-
-function setTemporaryExpression(body, expression, now, durationMs) {
-  body.face.overrideExpr = expression
-  body.face.overrideUntil = now + durationMs
-  setExpression(body, expression)
-}
-
-// 매 프레임 각 천체의 표정을 상태에 맞게 갱신
-function updateExpression(body, now) {
-  const f = body.face
-  if (f.overrideExpr) {
-    if (now < f.overrideUntil) return
-    f.overrideExpr = null
-  }
-
-  if (body.speed > MOVING_SPEED) {
-    setExpression(body, 'normal')
-    f.nextIdleChangeAt = 0
-    return
-  }
-
-  // 가만히 있는 중: 일정 시간마다 지루함/호기심/졸림 등으로 바뀜
-  if (now >= f.nextIdleChangeAt) {
-    if (f.nextIdleChangeAt !== 0) {
-      f.idle = pickIdleExpression(f.idle)
-    }
-    f.nextIdleChangeAt =
-      now + IDLE_CHANGE_MIN_MS + Math.random() * IDLE_CHANGE_RANGE_MS
-  }
-  setExpression(body, f.idle)
-}
-
 export function createGame(
   container,
-  { onScoreChange, onNextChange, onGameOver, onSfx, onMerge } = {}
+  {
+    mode = getMode(DEFAULT_MODE_ID),
+    onScoreChange,
+    onNextChange,
+    onGameOver,
+    onSfx,
+    onMerge,
+  } = {}
 ) {
   // 물리 세계 크기는 항상 config 값으로 고정하고, 좁은 화면에서는 CSS가 캔버스를 축소해 보여줍니다.
   // (화면 크기가 바뀌어도 게임이 초기화되지 않음)
   const width = CONTAINER_WIDTH
   const height = CONTAINER_HEIGHT
+
+  // ---------- 모드에 따라 달라지는 부분 ----------
+  // 천체 목록·그림·등장 범위가 모드마다 다르므로, 아래 함수들은 모드를 알아야 합니다.
+  function stageRadius(stage) {
+    return mode.stages[stage].radius * SIZE_SCALE
+  }
+
+  function randomSpawnStage() {
+    return Math.floor(Math.random() * mode.spawnPoolSize)
+  }
+
+  function createStageBody(stage, x, y, expression = 'normal') {
+    const radius = stageRadius(stage)
+    const scale = (radius * 2) / mode.spriteDiscDiameter
+    const body = Bodies.circle(x, y, radius, {
+      restitution: RESTITUTION,
+      friction: FRICTION,
+      frictionStatic: FRICTION_STATIC,
+      density: DENSITY,
+      render: {
+        sprite: {
+          texture: mode.getSprite(stage, expression),
+          xScale: scale,
+          yScale: scale,
+        },
+      },
+    })
+    body.gameStage = stage
+    body.spawnedAt = null // 첫 프레임에 기록 (게임오버 판정의 유예 시간 계산용)
+    body.countsForGameOver = false
+    body.face = {
+      current: expression,
+      idle: 'normal',
+      overrideExpr: null,
+      overrideUntil: 0,
+      nextIdleChangeAt: 0,
+    }
+    return body
+  }
+
+  function setExpression(body, expression) {
+    if (body.face.current === expression) return
+    body.face.current = expression
+    body.render.sprite.texture = mode.getSprite(body.gameStage, expression)
+  }
+
+  function setTemporaryExpression(body, expression, now, durationMs) {
+    body.face.overrideExpr = expression
+    body.face.overrideUntil = now + durationMs
+    setExpression(body, expression)
+  }
+
+  // 매 프레임 각 천체의 표정을 상태에 맞게 갱신
+  function updateExpression(body, now) {
+    const f = body.face
+    if (f.overrideExpr) {
+      if (now < f.overrideUntil) return
+      f.overrideExpr = null
+    }
+
+    if (body.speed > MOVING_SPEED) {
+      setExpression(body, 'normal')
+      f.nextIdleChangeAt = 0
+      return
+    }
+
+    // 가만히 있는 중: 일정 시간마다 지루함/호기심/졸림 등으로 바뀜
+    if (now >= f.nextIdleChangeAt) {
+      if (f.nextIdleChangeAt !== 0) {
+        f.idle = pickIdleExpression(f.idle)
+      }
+      f.nextIdleChangeAt =
+        now + IDLE_CHANGE_MIN_MS + Math.random() * IDLE_CHANGE_RANGE_MS
+    }
+    setExpression(body, f.idle)
+  }
 
   let lastLandSfxAt = -Infinity
   let isPaused = false
@@ -154,9 +157,9 @@ export function createGame(
   ])
 
   // 표정을 바꿔 끼울 때 첫 프레임이 비지 않도록 모든 스프라이트를 미리 로드
-  for (let stage = 0; stage < STAGES.length; stage++) {
+  for (let stage = 0; stage < mode.stages.length; stage++) {
     for (const expr of EXPRESSIONS) {
-      const uri = getSprite(stage, expr)
+      const uri = mode.getSprite(stage, expr)
       const img = new Image()
       img.src = uri
       render.textures[uri] = img
@@ -307,8 +310,8 @@ export function createGame(
       if (bodyA.isStatic || bodyB.isStatic) continue
       if (!canMerge(bodyA, bodyB)) continue
 
-      const mergedStage = getNextStage(bodyA.gameStage)
-      if (mergedStage === null) continue // 태양끼리 충돌 — 클리어 처리는 추후 단계에서 구현
+      const mergedStage = getNextStage(mode, bodyA.gameStage)
+      if (mergedStage === null) continue // 마지막 단계끼리 충돌 — 클리어 처리는 추후 단계에서 구현
 
       processed.add(bodyA.id)
       processed.add(bodyB.id)
@@ -322,9 +325,14 @@ export function createGame(
       setTemporaryExpression(merged, 'happy', now, MERGE_HAPPY_MS)
       World.add(engine.world, merged)
 
-      spawnBurst(midX, midY, STAGES[mergedStage].color, stageRadius(mergedStage))
+      spawnBurst(
+        midX,
+        midY,
+        mode.stages[mergedStage].color,
+        stageRadius(mergedStage)
+      )
       onSfx?.('merge', { stage: mergedStage })
-      onScoreChange?.(mergeScore(mergedStage))
+      onScoreChange?.(mergeScore(mode, mergedStage))
       onMerge?.(mergedStage)
     }
   }
@@ -404,9 +412,9 @@ export function createGame(
     ctx.restore()
 
     // 다음 천체 미리보기 (반투명)
-    const img = render.textures[getSprite(currentStage, 'normal')]
+    const img = render.textures[mode.getSprite(currentStage, 'normal')]
     if (img && img.complete && img.naturalWidth > 0) {
-      const scale = (radius * 2) / SPRITE_DISC_DIAMETER
+      const scale = (radius * 2) / mode.spriteDiscDiameter
       const w = img.naturalWidth * scale
       const h = img.naturalHeight * scale
       ctx.save()

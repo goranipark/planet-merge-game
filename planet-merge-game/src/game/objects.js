@@ -104,5 +104,4 @@ export const STAGES = [
   },
 ]
 
-// 등장 천체 범위(SPAWN_POOL_SIZE)는 config.js 에서 조정합니다.
-export { SPAWN_POOL_SIZE } from './config'
+// 등장 천체 범위와 점수표는 config.js 의 MODE_TUNING 에서 조정합니다.

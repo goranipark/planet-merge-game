@@ -1,7 +1,5 @@
-import { STAGES } from '../game/objects'
-import { getSprite } from '../game/sprites'
-
-const EARTH_KM = STAGES[5].diameterKm
+// 지구 지름(km) — 모드와 상관없이 "지구의 몇 배"를 계산하는 기준값입니다
+const EARTH_KM = 12742
 
 // 지구와 크기 비교 문구
 function compareToEarth(diameterKm) {
@@ -15,8 +13,8 @@ function compareToEarth(diameterKm) {
   return `지구의 약 ${Math.round(1 / ratio)}분의 1 크기예요`
 }
 
-function InfoCard({ stage, remaining, onClose }) {
-  const def = STAGES[stage]
+function InfoCard({ mode, stage, remaining, onClose }) {
+  const def = mode.stages[stage]
 
   return (
     <div className="info-backdrop">
@@ -24,7 +22,7 @@ function InfoCard({ stage, remaining, onClose }) {
         <div className="info-badge">✨ 새로운 천체 발견!</div>
         <img
           className="info-sprite"
-          src={getSprite(stage, 'happy')}
+          src={mode.getSprite(stage, 'happy')}
           alt={def.name}
           width={120}
           height={120}

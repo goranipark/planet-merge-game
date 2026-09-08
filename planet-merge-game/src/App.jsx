@@ -8,7 +8,7 @@ import {
   saveSeenStages,
 } from './game/storage'
 import { CONTAINER_WIDTH, CONTAINER_HEIGHT } from './game/config'
-import { STAGES } from './game/objects'
+import { getMode, DEFAULT_MODE_ID } from './game/modes'
 import { loadPlayer, savePlayer } from './game/playerStorage'
 import { submitScore, flushPending } from './game/leaderboard'
 import { initRoom, saveRoom } from './game/room'
@@ -26,6 +26,10 @@ import SiteFooter from './components/SiteFooter'
 import './App.css'
 
 function App() {
+  // 지금은 크기 순서 모드 하나뿐입니다.
+  // 모드 선택 화면은 ToDo2.md 7번 단계에서 추가합니다.
+  const mode = getMode(DEFAULT_MODE_ID)
+
   const containerRef = useRef(null)
   const scoreRef = useRef(0)
   const audioRef = useRef(null)
@@ -101,6 +105,7 @@ function App() {
 
     const audio = audioRef.current
     const game = createGame(containerRef.current, {
+      mode,
       onScoreChange: (delta) => {
         scoreRef.current += delta
         setScore(scoreRef.current)
@@ -135,7 +140,8 @@ function App() {
       game.destroy()
       gameRef.current = null
     }
-  }, [gameKey])
+    // mode 가 바뀌면(모드 전환) 게임을 새로 만듭니다
+  }, [gameKey, mode])
 
   // 게임이 끝나면 점수를 순위표에 등록 (반·별명을 정한 경우에만)
   async function handleGameOverSubmit() {
@@ -151,7 +157,9 @@ function App() {
 
     setSubmitState('submitting')
     const stageName =
-      maxStageRef.current >= 0 ? STAGES[maxStageRef.current].name : '소행성'
+      maxStageRef.current >= 0
+        ? mode.stages[maxStageRef.current].name
+        : mode.stages[0].name
     const result = await submitScore({
       nickname: currentPlayer.nickname,
       score: scoreRef.current,
@@ -198,12 +206,12 @@ function App() {
 
         <div className="hud">
           <ScoreBoard score={score} best={best} />
-          <NextPreview stage={nextStage} />
+          <NextPreview mode={mode} stage={nextStage} />
           <MuteButton muted={muted} onToggle={toggleMute} />
         </div>
 
         <div className="play-area">
-          <PlanetGuide maxStage={maxStage} />
+          <PlanetGuide mode={mode} maxStage={maxStage} />
 
           <div
             id="game-container-wrapper"
@@ -223,6 +231,7 @@ function App() {
             {cardQueue.length > 0 && (
               <InfoCard
                 key={cardQueue[0]}
+                mode={mode}
                 stage={cardQueue[0]}
                 remaining={cardQueue.length - 1}
                 onClose={closeCard}
