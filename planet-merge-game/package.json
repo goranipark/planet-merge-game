@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "rules": "node ../scripts/build-firestore-rules.mjs",
+    "check:orbits": "node ../scripts/check-orbits.mjs",
     "lint": "oxlint",
     "preview": "vite preview"
   },

@@ -7,6 +7,9 @@
 // 천체 데이터·궤도 그림·엔진 연결은 ToDo2.md 3~5번 단계에서 채웁니다.
 // (comingSoon 을 지우면 잠금이 풀리므로, 데이터가 다 준비된 뒤에 지워야 합니다)
 
+import { ORBITS } from '../orbits'
+import { MODE_TUNING } from '../config'
+
 export const distanceMode = {
   id: 'distance',
   name: '거리 순서 게임',
@@ -25,10 +28,12 @@ export const distanceMode = {
     footnote: '8단계 · 태양에서 가까운 순서',
   },
 
-  // --- 아래는 ToDo2.md 2~4번 단계에서 채웁니다 ---
-  stages: [],
-  spawnPoolSize: 0,
-  mergeScores: [],
+  // 이 모드에 등장하는 궤도 목록 (태양에서 가까운 순서)
+  stages: ORBITS,
+  spawnPoolSize: MODE_TUNING.distance.spawnPoolSize,
+  mergeScores: MODE_TUNING.distance.mergeScores,
+
+  // --- 궤도 고리 그림은 ToDo2.md 4번 단계에서 채웁니다 ---
   getSprite: null,
   spriteDiscDiameter: 0,
   guide: {

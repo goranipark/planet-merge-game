@@ -41,6 +41,11 @@ export const MODE_TUNING = {
     spawnPoolSize: 5,
     mergeScores: [0, 10, 20, 35, 55, 80, 110, 150, 200, 270, 400],
   },
+  // 거리 순서 게임 — 8단계뿐이라 단계당 배점을 크기 순서 게임보다 크게 잡았습니다
+  distance: {
+    spawnPoolSize: 3, // 수성·금성·지구 궤도만 떨어짐
+    mergeScores: [0, 10, 25, 45, 75, 120, 190, 300],
+  },
 }
 
 // [표정] ms
