@@ -5,14 +5,15 @@
 
 export const SPRITE_DISC_DIAMETER = 180
 
-const OUTLINE = '#2b2340'
+// 외곽선 색 — 거리 순서 모드의 궤도 그림(orbitSprites.js)에서도 같은 색을 씁니다
+export const OUTLINE = '#2b2340'
 const SW = 7 // 외곽선 두께
 
-function svgDoc(size, inner) {
+export function svgDoc(size, inner) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${inner}</svg>`
 }
 
-function toDataUri(svg) {
+export function toDataUri(svg) {
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
 }
 
@@ -85,7 +86,8 @@ function blush(cx, cy, r, opacity = 0.6) {
 }
 
 // 귀여운 얼굴 (표정별)
-function face(cx, cy, r, expression = 'normal', skin = '#fff') {
+// 표정 그리기 — 거리 순서 모드의 궤도 그림에서도 그대로 재사용합니다
+export function face(cx, cy, r, expression = 'normal', skin = '#fff') {
   const ey = cy - r * 0.02
   const ex = r * 0.3
   const er = r * 0.09

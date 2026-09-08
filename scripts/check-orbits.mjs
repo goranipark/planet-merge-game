@@ -6,6 +6,10 @@
 // 궤도 반지름이나 점수를 손본 뒤 이 스크립트를 돌리면, 게임이 깨지는 값인지 바로 알려 줍니다.
 import { ORBITS, AU_KM } from '../planet-merge-game/src/game/orbits.js'
 import { MODE_TUNING, CONTAINER_WIDTH } from '../planet-merge-game/src/game/config.js'
+import {
+  getOrbitSprite,
+  ORBIT_SPRITE_DIAMETER,
+} from '../planet-merge-game/src/game/orbitSprites.js'
 
 const problems = []
 const notes = []
@@ -87,6 +91,35 @@ check(
   MODE_TUNING.distance.spawnPoolSize < ORBITS.length,
   '처음 떨어지는 궤도 범위가 전체 단계 수보다 크거나 같습니다'
 )
+
+// 9. 궤도 그림이 화면에서 의도한 두께·크기로 나오는지
+//    스프라이트는 단계마다 다른 배율로 축소되므로, 원본 숫자가 아니라
+//    "배율을 곱한 화면 픽셀"이 모든 단계에서 같아야 합니다.
+const 화면크기 = ORBITS.map((o) => {
+  const svg = decodeURIComponent(getOrbitSprite(o.id).slice(getOrbitSprite(o.id).indexOf(',') + 1))
+  const 배율 = (o.radius * 2) / ORBIT_SPRITE_DIAMETER
+  const 고리 = svg.match(`stroke="${o.color}" stroke-width="([0-9.]+)"`)
+  const 점 = svg.match(`r="([0-9.]+)" fill="${o.color}"`)
+  check(고리 !== null, `${o.name} 그림에서 고리를 찾지 못했습니다`)
+  check(점 !== null, `${o.name} 그림에서 행성 점을 찾지 못했습니다`)
+  return {
+    이름: o.name,
+    고리: 고리 ? Number(고리[1]) * 배율 : 0,
+    점: 점 ? Number(점[1]) * 배율 : 0,
+    기대점: o.dot,
+  }
+})
+
+화면크기.forEach((s) => {
+  check(
+    Math.abs(s.고리 - 4) < 0.3,
+    `${s.이름} 고리 굵기가 화면에서 ${s.고리.toFixed(2)}px 입니다 (4px 이어야 함)`
+  )
+  check(
+    Math.abs(s.점 - s.기대점) < 0.3,
+    `${s.이름} 행성 점이 화면에서 ${s.점.toFixed(2)}px 입니다 (${s.기대점}px 이어야 함)`
+  )
+})
 
 // ---------- 표로 출력 ----------
 // 한글은 터미널에서 두 칸을 차지하므로, 글자 수가 아니라 화면 폭으로 맞춰 줍니다

@@ -8,6 +8,7 @@
 // (comingSoon 을 지우면 잠금이 풀리므로, 데이터가 다 준비된 뒤에 지워야 합니다)
 
 import { ORBITS } from '../orbits'
+import { getOrbitSprite, ORBIT_SPRITE_DIAMETER } from '../orbitSprites'
 import { MODE_TUNING } from '../config'
 
 export const distanceMode = {
@@ -33,9 +34,9 @@ export const distanceMode = {
   spawnPoolSize: MODE_TUNING.distance.spawnPoolSize,
   mergeScores: MODE_TUNING.distance.mergeScores,
 
-  // --- 궤도 고리 그림은 ToDo2.md 4번 단계에서 채웁니다 ---
-  getSprite: null,
-  spriteDiscDiameter: 0,
+  // 궤도 고리 그림 (orbitSprites.js)
+  getSprite: getOrbitSprite,
+  spriteDiscDiameter: ORBIT_SPRITE_DIAMETER,
   guide: {
     title: '거리 순서표',
     hint: '같은 궤도 2개 → 한 단계 바깥 궤도',
