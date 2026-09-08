@@ -35,6 +35,11 @@ export const distanceMode = {
   spawnPoolSize: MODE_TUNING.distance.spawnPoolSize,
   mergeScores: MODE_TUNING.distance.mergeScores,
 
+  // 해왕성 궤도 두 개가 만나면 "태양계 하나 완성"으로 사라집니다.
+  // 더 합칠 데가 없는 가장 큰 궤도가 바닥에 쌓여 병을 막는 것을 막아 줍니다.
+  popFinalPair: true,
+  finalPairScore: MODE_TUNING.distance.finalPairScore,
+
   // 궤도 고리 그림 (orbitSprites.js)
   getSprite: getOrbitSprite,
   spriteDiscDiameter: ORBIT_SPRITE_DIAMETER,

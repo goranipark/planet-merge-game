@@ -45,6 +45,9 @@ export const MODE_TUNING = {
   distance: {
     spawnPoolSize: 3, // 수성·금성·지구 궤도만 떨어짐
     mergeScores: [0, 10, 25, 45, 75, 120, 190, 300],
+    // 마지막 단계(해왕성 궤도) 두 개가 만나면 "태양계 하나 완성"으로 사라지며 받는 점수.
+    // 이렇게 하지 않으면 가장 큰 궤도들이 병 바닥에 쌓여 게임이 금방 끝납니다.
+    finalPairScore: 500,
   },
 }
 

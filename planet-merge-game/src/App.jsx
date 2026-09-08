@@ -62,7 +62,8 @@ function App() {
   // 고른 모드(없으면 null → 모드 선택 창이 뜸). 뒤에서 도는 게임은 기본 모드로 돌아갑니다.
   const [modeId, setModeId] = useState(() => initMode())
   const [showModeSelect, setShowModeSelect] = useState(() => initMode() === null)
-  const [cleared, setCleared] = useState(false) // 마지막 단계까지 만들었는지
+  // 화면 위에 잠깐 띄우는 알림 (완성했을 때 등). null 이면 안 보임
+  const [banner, setBanner] = useState(null)
   const [showRuler, setShowRuler] = useState(false) // 실제 거리 보기 화면
   const mode = getMode(modeId ?? DEFAULT_MODE_ID)
 
@@ -113,7 +114,7 @@ function App() {
     setCardQueue([])
     setMaxStage(-1)
     setSubmitState(null)
-    setCleared(false)
+    setBanner(null)
     setShowRuler(false)
 
     if (MAINTENANCE || !containerRef.current) return
@@ -138,7 +139,7 @@ function App() {
         setMaxStage((prev) => Math.max(prev, stage))
         // 마지막 단계(태양 / 해왕성 궤도)를 만들면 완성
         if (stage === mode.stages.length - 1) {
-          setCleared(true)
+          setBanner(`🎉 ${mode.stages[stage].name}까지 만들었어요! 완성!`)
           // 완성하면 실제 거리 화면으로 마무리 (거리 순서 게임만)
           if (mode.hasDistanceRuler) {
             setShowRuler(true)
@@ -151,6 +152,10 @@ function App() {
         saveSeenStages(seenStagesRef.current)
         setCardQueue((q) => [...q, stage])
         game.pause()
+      },
+      // 마지막 궤도 두 개가 만나 "태양계 하나 완성"으로 사라졌을 때
+      onFinalPair: (bonus) => {
+        setBanner(`🌟 태양계 하나 완성! +${bonus}점`)
       },
       onGameOver: () => {
         audio.play('gameover')
@@ -274,10 +279,10 @@ function App() {
           </button>
         </header>
 
-        {cleared && (
+        {banner && (
           <div className="clear-banner">
-            <span>🎉 {mode.stages[mode.stages.length - 1].name}까지 만들었어요! 완성!</span>
-            <button type="button" onClick={() => setCleared(false)} aria-label="닫기">
+            <span>{banner}</span>
+            <button type="button" onClick={() => setBanner(null)} aria-label="닫기">
               ×
             </button>
           </div>

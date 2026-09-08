@@ -44,6 +44,7 @@ export function createGame(
     onGameOver,
     onSfx,
     onMerge,
+    onFinalPair,
   } = {}
 ) {
   // 물리 세계 크기는 항상 config 값으로 고정하고, 좁은 화면에서는 CSS가 캔버스를 축소해 보여줍니다.
@@ -125,6 +126,14 @@ export function createGame(
         now + IDLE_CHANGE_MIN_MS + Math.random() * IDLE_CHANGE_RANGE_MS
     }
     setExpression(body, f.idle)
+  }
+
+  // 병이 화면에서 얼마나 축소되어 그려지는지 (1 = 원래 크기, 0.9 = 10% 작게)
+  // 이름표 글자를 이 비율로 나누어 키워야 어떤 화면에서도 같은 크기로 읽힙니다.
+  let cssScale = 1
+  function updateCssScale() {
+    const rect = container.getBoundingClientRect()
+    if (rect.width > 0) cssScale = rect.width / CONTAINER_WIDTH
   }
 
   let lastLandSfxAt = -Infinity
@@ -311,7 +320,27 @@ export function createGame(
       if (!canMerge(bodyA, bodyB)) continue
 
       const mergedStage = getNextStage(mode, bodyA.gameStage)
-      if (mergedStage === null) continue // 마지막 단계끼리 충돌 — 클리어 처리는 추후 단계에서 구현
+      if (mergedStage === null) {
+        // 마지막 단계끼리 만났을 때
+        if (!mode.popFinalPair) continue // 그대로 둠 (크기 순서 게임)
+        // 거리 순서 게임: "태양계 하나 완성"으로 둘 다 사라지고 큰 점수
+        processed.add(bodyA.id)
+        processed.add(bodyB.id)
+        const lastStage = bodyA.gameStage
+        for (const b of [bodyA, bodyB]) {
+          spawnBurst(
+            b.position.x,
+            b.position.y,
+            mode.stages[lastStage].color,
+            stageRadius(lastStage)
+          )
+          World.remove(engine.world, b)
+        }
+        onSfx?.('merge', { stage: lastStage })
+        onScoreChange?.(mode.finalPairScore ?? 0)
+        onFinalPair?.(mode.finalPairScore ?? 0)
+        continue
+      }
 
       processed.add(bodyA.id)
       processed.add(bodyB.id)
@@ -476,7 +505,10 @@ export function createGame(
   // 공 위의 이름표 (예: "3 지구")
   // 그림 안에 글자를 넣으면 공이 구를 때 글자도 뒤집히므로, 여기서 화면 기준으로 똑바로 그립니다.
   function drawLabel(ctx, text, x, y, radius) {
-    const size = Math.max(9, Math.min(13, radius * 0.3))
+    // 화면에 실제로 찍히는 크기를 10~14px 로 맞춘 뒤, 축소 비율만큼 되돌려 그립니다.
+    // (크롬북처럼 병이 작아지는 화면에서도 글자가 작아지지 않습니다)
+    const onScreen = Math.max(10, Math.min(14, radius * cssScale * 0.32))
+    const size = onScreen / cssScale
     ctx.save()
     ctx.font = `bold ${size}px system-ui, sans-serif`
     ctx.textAlign = 'center'
@@ -500,6 +532,7 @@ export function createGame(
 
   function handleAfterRender() {
     const ctx = render.context
+    updateCssScale()
     drawGameOverLine(ctx)
     drawAimPreview(ctx)
     drawLabels(ctx)
