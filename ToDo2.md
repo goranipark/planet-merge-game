@@ -30,7 +30,7 @@ ver1 체크리스트는 [ToDo.md](ToDo.md)에 있습니다.
 
 겉으로 보이는 변화가 **없는** 단계입니다. ver1이 이전과 똑같이 동작하면 성공입니다.
 
-- `src/game/modes/sizeMode.js` — ver1 데이터를 모드 객체로 감싸기
+- `src/game/modes/sizeMode.jsx` — ver1 데이터를 모드 객체로 감싸기 (안내 문구에 굵은 글씨가 있어 .jsx)
 - `src/game/modes/index.js` — 모드 목록과 조회 함수
 - `engine.js` — `createGame(el, { mode, ... })`로 모드를 주입받도록 변경
 - `mergeLogic.js` — 모드의 단계 수·점수표를 쓰도록 변경
