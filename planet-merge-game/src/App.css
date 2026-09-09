@@ -1827,3 +1827,14 @@
   width: 100%;
   margin-top: 16px;
 }
+
+/* 시작 준비 중(안내·학급 코드·게임 고르기·별명)에는 게임을 감춥니다 */
+#game-page.is-starting {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#game-page.is-starting .site-footer {
+  margin-top: auto;
+}

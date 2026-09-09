@@ -64,6 +64,10 @@ function App() {
   const [showRoomSetup, setShowRoomSetup] = useState(false)
   // 게임이 바뀐 것을 알리는 첫 화면 안내 (game/notice.js)
   const [showNotice, setShowNotice] = useState(() => shouldShowNotice())
+  // 시작 준비(안내 → 학급 코드 → 게임 고르기 → 별명)가 끝났는지.
+  // 끝나기 전에는 게임을 아예 만들지 않습니다 — 팝업 뒤에서 천체가 떨어지고 있으면
+  // 학생 눈에는 "이미 시작된 화면"으로 보여서 헷갈립니다.
+  const [started, setStarted] = useState(false)
   // 고른 모드(없으면 null → 모드 선택 창이 뜸). 뒤에서 도는 게임은 기본 모드로 돌아갑니다.
   const [modeId, setModeId] = useState(() => initMode())
   const [showModeSelect, setShowModeSelect] = useState(() => initMode() === null)
@@ -74,6 +78,14 @@ function App() {
 
   playerRef.current = player
   roomRef.current = room
+
+  // 준비가 한 번 끝나면 계속 게임 화면을 보여 줍니다
+  // (나중에 "바꾸기"로 창을 열어도 게임이 사라지지 않도록 되돌리지 않습니다)
+  const setupDone =
+    !showNotice && room !== null && modeId !== null && player !== null
+  useEffect(() => {
+    if (setupDone) setStarted(true)
+  }, [setupDone])
 
   // 오디오 매니저는 앱 전체에서 하나만 사용
   if (!audioRef.current) {
@@ -122,7 +134,7 @@ function App() {
     setBanner(null)
     setShowRuler(false)
 
-    if (MAINTENANCE || !containerRef.current) return
+    if (MAINTENANCE || !started || !containerRef.current) return
 
     const audio = audioRef.current
     const game = createGame(containerRef.current, {
@@ -175,7 +187,7 @@ function App() {
       gameRef.current = null
     }
     // mode 가 바뀌면(모드 전환) 게임을 새로 만듭니다
-  }, [gameKey, mode])
+  }, [gameKey, mode, started])
 
   // 게임이 끝나면 점수를 순위표에 등록 (반·별명을 정한 경우에만)
   async function handleGameOverSubmit() {
@@ -276,19 +288,28 @@ function App() {
   return (
     <>
       <SpaceBackground />
-      <div id="game-page">
+      <div id="game-page" className={started ? '' : 'is-starting'}>
         <header className="title-area">
           <h1>🌟 행성 합치기 게임</h1>
-          <p>마우스로 위치를 정하고 클릭하면 천체가 떨어져요. 같은 천체 둘이 만나면 더 큰 천체로 변신!</p>
-          <button
-            type="button"
-            className="mode-chip"
-            onClick={() => setShowModeSelect(true)}
-          >
-            <span aria-hidden="true">{mode.select.emoji}</span> {mode.name}
-            <span className="mode-chip-action">바꾸기</span>
-          </button>
+          {started && (
+            <>
+              <p>마우스로 위치를 정하고 클릭하면 천체가 떨어져요. 같은 천체 둘이 만나면 더 큰 천체로 변신!</p>
+              <button
+                type="button"
+                className="mode-chip"
+                onClick={() => setShowModeSelect(true)}
+              >
+                <span aria-hidden="true">{mode.select.emoji}</span> {mode.name}
+                <span className="mode-chip-action">바꾸기</span>
+              </button>
+            </>
+          )}
         </header>
+
+        {/* 준비(안내 → 학급 코드 → 게임 고르기 → 별명)가 끝나야 게임을 보여 줍니다.
+            그 전에는 팝업 뒤에 아무것도 없어야 학생이 헷갈리지 않습니다. */}
+        {started && (
+        <>
 
         {banner && (
           <div className="clear-banner">
@@ -362,6 +383,9 @@ function App() {
           />
         </div>
 
+        </>
+        )}
+
         <SiteFooter />
       </div>
 
@@ -374,21 +398,19 @@ function App() {
         />
       )}
 
-      {!showNotice && showModeSelect && (
-        <ModeSelect
-          current={modeId}
-          onSelect={handleSelectMode}
-          onCancel={modeId ? () => setShowModeSelect(false) : null}
-        />
-      )}
-
-      {/* 모드 → 학급 코드 → 별명 순서로 물어봅니다.
-          순위표에서 "학급 코드 바꾸기"를 눌렀을 때도 같은 창을 씁니다. */}
-      {!showNotice && !showModeSelect && (room === null || showRoomSetup) && (
+      {!showNotice && (room === null || showRoomSetup) && (
         <RoomGate
           modeId={modeId}
           onEnter={handleEnterRoom}
           onCancel={room === null ? null : () => setShowRoomSetup(false)}
+        />
+      )}
+
+      {!showNotice && room !== null && !showRoomSetup && showModeSelect && (
+        <ModeSelect
+          current={modeId}
+          onSelect={handleSelectMode}
+          onCancel={modeId ? () => setShowModeSelect(false) : null}
         />
       )}
 
