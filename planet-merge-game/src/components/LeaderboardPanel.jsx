@@ -114,16 +114,22 @@ function LeaderboardPanel({
           <br />첫 번째 주인공이 되어보세요!</p>
       ) : (
         <ol className="lb-list">
-          {rows.map((row, index) => (
-            <li key={row.id} className={`lb-row${index === 0 ? ' is-top' : ''}`}>
-              <span className="lb-rank">{MEDALS[index] ?? index + 1}</span>
-              <span className="lb-who">
-                <strong>{row.nickname}</strong>
-                {row.stageReached && <em>{row.stageReached}까지</em>}
-              </span>
-              <span className="lb-score">{row.score.toLocaleString('ko-KR')}</span>
-            </li>
-          ))}
+          {rows.map((row, index) => {
+            // 하이라이트는 "1등"이 아니라 "내 기록"에만 합니다.
+            // 1등 줄을 강조하면 학생이 그 줄을 자기 것으로 오해합니다.
+            const 내기록 = Boolean(player) && row.nickname === player.nickname
+            return (
+              <li key={row.id} className={`lb-row${내기록 ? ' is-me' : ''}`}>
+                <span className="lb-rank">{MEDALS[index] ?? index + 1}</span>
+                <span className="lb-who">
+                  <strong>{row.nickname}</strong>
+                  {row.stageReached && <em>{row.stageReached}까지</em>}
+                </span>
+                {내기록 && <span className="lb-me-badge">나</span>}
+                <span className="lb-score">{row.score.toLocaleString('ko-KR')}</span>
+              </li>
+            )
+          })}
         </ol>
       )}
 
