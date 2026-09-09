@@ -1751,3 +1751,79 @@
   font-size: 11px;
   opacity: 0.8;
 }
+
+/* ---------- 첫 화면 안내 팝업 ---------- */
+.notice-card {
+  max-width: 380px;
+}
+
+.notice-list {
+  list-style: none;
+  margin: 16px 0 4px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.notice-list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.notice-icon {
+  flex: none;
+  width: 30px;
+  font-size: 22px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.notice-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  word-break: keep-all;
+}
+
+.notice-text strong {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--accent);
+}
+
+.notice-text em {
+  font-style: normal;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.notice-teacher,
+.notice-student {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.55;
+  text-align: left;
+  word-break: keep-all;
+}
+
+.notice-teacher {
+  background: rgba(255, 213, 79, 0.12);
+  border-left: 4px solid var(--accent);
+  color: #ffeec2;
+}
+
+.notice-student {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--muted);
+}
+
+.notice-ok {
+  width: 100%;
+  margin-top: 16px;
+}

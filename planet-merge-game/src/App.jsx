@@ -18,6 +18,7 @@ import { initMode, saveMode } from './game/modeStorage'
 import { loadPlayer, savePlayer } from './game/playerStorage'
 import { submitScore, flushPending } from './game/leaderboard'
 import { initRoom, saveRoom, hasLeaderboard } from './game/room'
+import { shouldShowNotice, dismissNotice } from './game/notice'
 import SpaceBackground from './components/SpaceBackground'
 import ScoreBoard from './components/ScoreBoard'
 import NextPreview from './components/NextPreview'
@@ -30,6 +31,7 @@ import NicknamePicker from './components/NicknamePicker'
 import DistanceRuler from './components/DistanceRuler'
 import ModeSelect from './components/ModeSelect'
 import RoomGate from './components/RoomGate'
+import NoticePopup from './components/NoticePopup'
 import SiteFooter from './components/SiteFooter'
 import './App.css'
 
@@ -60,6 +62,8 @@ function App() {
   // 학급 코드. null 이면 아직 안 정한 상태 → 코드 화면을 띄웁니다.
   const [room, setRoom] = useState(() => initRoom())
   const [showRoomSetup, setShowRoomSetup] = useState(false)
+  // 게임이 바뀐 것을 알리는 첫 화면 안내 (game/notice.js)
+  const [showNotice, setShowNotice] = useState(() => shouldShowNotice())
   // 고른 모드(없으면 null → 모드 선택 창이 뜸). 뒤에서 도는 게임은 기본 모드로 돌아갑니다.
   const [modeId, setModeId] = useState(() => initMode())
   const [showModeSelect, setShowModeSelect] = useState(() => initMode() === null)
@@ -361,7 +365,16 @@ function App() {
         <SiteFooter />
       </div>
 
-      {showModeSelect && (
+      {showNotice && (
+        <NoticePopup
+          onClose={() => {
+            dismissNotice()
+            setShowNotice(false)
+          }}
+        />
+      )}
+
+      {!showNotice && showModeSelect && (
         <ModeSelect
           current={modeId}
           onSelect={handleSelectMode}
@@ -371,7 +384,7 @@ function App() {
 
       {/* 모드 → 학급 코드 → 별명 순서로 물어봅니다.
           순위표에서 "학급 코드 바꾸기"를 눌렀을 때도 같은 창을 씁니다. */}
-      {!showModeSelect && (room === null || showRoomSetup) && (
+      {!showNotice && !showModeSelect && (room === null || showRoomSetup) && (
         <RoomGate
           modeId={modeId}
           onEnter={handleEnterRoom}
@@ -379,7 +392,7 @@ function App() {
         />
       )}
 
-      {showSetup && !showModeSelect && room !== null && !showRoomSetup && (
+      {!showNotice && showSetup && !showModeSelect && room !== null && !showRoomSetup && (
         <NicknamePicker
           initial={player}
           onSave={handleSavePlayer}
