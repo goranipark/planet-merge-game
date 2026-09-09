@@ -17,7 +17,7 @@ import { getMode, DEFAULT_MODE_ID } from './game/modes'
 import { initMode, saveMode } from './game/modeStorage'
 import { loadPlayer, savePlayer } from './game/playerStorage'
 import { submitScore, flushPending } from './game/leaderboard'
-import { initRoom, saveRoom } from './game/room'
+import { initRoom, saveRoom, hasLeaderboard } from './game/room'
 import SpaceBackground from './components/SpaceBackground'
 import ScoreBoard from './components/ScoreBoard'
 import NextPreview from './components/NextPreview'
@@ -27,9 +27,9 @@ import InfoCard from './components/InfoCard'
 import PlanetGuide from './components/PlanetGuide'
 import LeaderboardPanel from './components/LeaderboardPanel'
 import NicknamePicker from './components/NicknamePicker'
-import RoomSetup from './components/RoomSetup'
 import DistanceRuler from './components/DistanceRuler'
 import ModeSelect from './components/ModeSelect'
+import RoomGate from './components/RoomGate'
 import SiteFooter from './components/SiteFooter'
 import './App.css'
 
@@ -57,6 +57,7 @@ function App() {
   const [showSetup, setShowSetup] = useState(() => loadPlayer() === null)
   const [submitState, setSubmitState] = useState(null)
   const [lbRefreshKey, setLbRefreshKey] = useState(0)
+  // 학급 코드. null 이면 아직 안 정한 상태 → 코드 화면을 띄웁니다.
   const [room, setRoom] = useState(() => initRoom())
   const [showRoomSetup, setShowRoomSetup] = useState(false)
   // 고른 모드(없으면 null → 모드 선택 창이 뜸). 뒤에서 도는 게임은 기본 모드로 돌아갑니다.
@@ -179,6 +180,11 @@ function App() {
       setSubmitState('skipped')
       return
     }
+    // 혼자 연습 중이면 순위표에 올리지 않습니다
+    if (!hasLeaderboard(roomRef.current)) {
+      setSubmitState('practice')
+      return
+    }
     if (scoreRef.current <= 0) {
       setSubmitState(null)
       return
@@ -200,7 +206,8 @@ function App() {
     setLbRefreshKey((k) => k + 1)
   }
 
-  function handleSaveRoom(nextRoom) {
+  // 학급 코드 화면에서 코드를 넣었을 때 (혼자 연습 포함)
+  function handleEnterRoom(nextRoom) {
     saveRoom(nextRoom)
     setRoom(nextRoom)
     setShowRoomSetup(false)
@@ -362,8 +369,17 @@ function App() {
         />
       )}
 
-      {/* 모드를 먼저 고르고, 그다음에 별명을 고릅니다 */}
-      {showSetup && !showModeSelect && (
+      {/* 모드 → 학급 코드 → 별명 순서로 물어봅니다.
+          순위표에서 "학급 코드 바꾸기"를 눌렀을 때도 같은 창을 씁니다. */}
+      {!showModeSelect && (room === null || showRoomSetup) && (
+        <RoomGate
+          modeId={modeId}
+          onEnter={handleEnterRoom}
+          onCancel={room === null ? null : () => setShowRoomSetup(false)}
+        />
+      )}
+
+      {showSetup && !showModeSelect && room !== null && !showRoomSetup && (
         <NicknamePicker
           initial={player}
           onSave={handleSavePlayer}
@@ -381,13 +397,6 @@ function App() {
         />
       )}
 
-      {showRoomSetup && (
-        <RoomSetup
-          room={room}
-          onSave={handleSaveRoom}
-          onClose={() => setShowRoomSetup(false)}
-        />
-      )}
     </>
   )
 }

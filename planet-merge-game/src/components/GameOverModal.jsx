@@ -3,7 +3,8 @@ const SUBMIT_MESSAGE = {
   saved: '순위표에 등록했어요!',
   queued: '인터넷이 불안정해요. 연결되면 자동으로 올릴게요.',
   rejected: '순위표에 올리지 못했어요.',
-  skipped: '반과 별명을 정하면 순위표에 올릴 수 있어요.',
+  skipped: '별명을 정하면 순위표에 올릴 수 있어요.',
+  practice: '혼자 연습 중이라 순위표에는 올리지 않았어요.',
 }
 
 function GameOverModal({ score, best, onRestart, submitState }) {

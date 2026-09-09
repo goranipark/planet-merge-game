@@ -59,8 +59,9 @@ export function validateEntry({ nickname, score, stageReached, room, gameMode })
     .trim()
     .slice(0, NICKNAME_MAX)
   const cleanScore = Math.floor(Number(score))
-  const cleanRoom = isValidRoom(room) ? room : DEFAULT_ROOM
+  const cleanRoom = isValidRoom(room) ? room : ''
 
+  if (!cleanRoom) return { ok: false, reason: '학급 코드가 없습니다.' }
   if (!cleanNickname) return { ok: false, reason: '별명이 비어 있습니다.' }
   if (!ALLOW_CUSTOM_NICKNAME && !isGeneratedNickname(cleanNickname))
     return { ok: false, reason: '준비된 별명 중에서 골라 주세요.' }

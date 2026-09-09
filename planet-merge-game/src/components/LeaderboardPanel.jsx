@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { PERIODS, DEFAULT_ROOM } from '../game/leaderboardConfig'
+import { PERIODS } from '../game/leaderboardConfig'
+import { hasLeaderboard, formatRoomCode } from '../game/room'
 import { fetchTopScores, isOnlineMode, pendingCount } from '../game/leaderboard'
 import { nextResetText } from '../game/periods'
 
@@ -18,7 +19,10 @@ function LeaderboardPanel({
   const [mode, setMode] = useState(isOnlineMode ? 'online' : 'local')
   const [loading, setLoading] = useState(true)
 
+  const 순위표씀 = hasLeaderboard(room)
+
   const load = useCallback(async () => {
+    if (!순위표씀) return
     setLoading(true)
     const result = await fetchTopScores(periodId, room, gameMode.id)
     setRows(result.rows)
@@ -27,6 +31,7 @@ function LeaderboardPanel({
   }, [periodId, room, gameMode.id])
 
   useEffect(() => {
+    if (!순위표씀) return
     let alive = true
     ;(async () => {
       const result = await fetchTopScores(periodId, room, gameMode.id)
@@ -42,12 +47,36 @@ function LeaderboardPanel({
 
   const waiting = pendingCount()
 
+  // 혼자 연습 중 — 순위표 대신 학급 코드를 넣으라고 안내합니다
+  if (!순위표씀) {
+    return (
+      <aside className="card leaderboard">
+        <div className="lb-header">
+          <h2 className="lb-title">혼자 연습 중</h2>
+        </div>
+        <p className="lb-empty">
+          지금은 <strong>순위표에 올라가지 않아요.</strong>
+          <br />
+          우리 반 코드를 넣으면 친구들과 겨룰 수 있어요!
+        </p>
+        <div className="lb-footer">
+          <button type="button" className="lb-player" onClick={onChangeRoom}>
+            학급 코드 넣기
+          </button>
+          {player && (
+            <button type="button" className="lb-player" onClick={onChangePlayer}>
+              <strong>{player.nickname}</strong> 바꾸기
+            </button>
+          )}
+        </div>
+      </aside>
+    )
+  }
+
   return (
     <aside className="card leaderboard">
       <div className="lb-header">
-        <h2 className="lb-title">
-          {room === DEFAULT_ROOM ? '순위표' : '우리 반 순위표'}
-        </h2>
+        <h2 className="lb-title">우리 반 순위표</h2>
         <button
           type="button"
           className="lb-refresh"
@@ -111,18 +140,16 @@ function LeaderboardPanel({
         {waiting > 0 && (
           <p className="lb-note lb-warn">보내지 못한 기록 {waiting}개 (연결되면 자동 전송)</p>
         )}
-        {room !== DEFAULT_ROOM && (
-          <p className="lb-room">
-            학급 코드 <strong>{room}</strong>
-          </p>
-        )}
+        <p className="lb-room">
+          학급 코드 <strong>{formatRoomCode(room)}</strong>
+        </p>
         {player && (
           <button type="button" className="lb-player" onClick={onChangePlayer}>
             {player.nickname} <span>바꾸기</span>
           </button>
         )}
         <button type="button" className="lb-room-btn" onClick={onChangeRoom}>
-          {room === DEFAULT_ROOM ? '학급 순위표 만들기' : '학급 코드 바꾸기'}
+          학급 코드 바꾸기
         </button>
       </div>
     </aside>

@@ -1665,3 +1665,89 @@
 #game-page.is-maintenance .site-footer {
   margin-top: auto;
 }
+
+/* ---------- 학급 코드 화면 ---------- */
+/* 발급된 코드를 칠판에 적기 좋게 크게 */
+.room-code-big {
+  margin: 14px auto 10px;
+  padding: 12px 18px;
+  max-width: 320px;
+  border: 3px dashed var(--accent);
+  border-radius: 16px;
+  background: rgba(255, 213, 79, 0.12);
+  font-family: var(--font-display);
+  font-size: 40px;
+  letter-spacing: 4px;
+  color: var(--accent);
+  text-shadow: 0 3px 0 var(--outline);
+}
+
+/* 코드 입력칸은 크고 또렷하게 (학생이 칠판을 보고 칩니다) */
+.room-code-field input {
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: 3px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.room-code-field input::placeholder {
+  letter-spacing: 2px;
+  text-transform: none;
+}
+
+.room-join {
+  width: 100%;
+  margin-top: 12px;
+}
+
+/* "선생님이신가요?" 구분선 */
+.room-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.room-divider::before,
+.room-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--card-border);
+}
+
+.room-make {
+  width: 100%;
+}
+
+/* 혼자 연습하기 — 눈에 띄되 주된 선택지는 아니게 */
+.room-practice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px;
+  border: 2px dashed var(--card-border);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.room-practice:hover {
+  border-color: var(--muted);
+  color: var(--text);
+}
+
+.room-practice em {
+  font-style: normal;
+  font-size: 11px;
+  opacity: 0.8;
+}
