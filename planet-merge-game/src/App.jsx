@@ -276,7 +276,7 @@ function App() {
         <SpaceBackground />
         <div id="game-page" className="is-maintenance">
           <header className="title-area">
-            <h1>🌟 행성 합치기 게임</h1>
+            <h1>🌟 천체 합치기 게임</h1>
           </header>
           <SiteFooter />
         </div>
@@ -290,7 +290,7 @@ function App() {
       <SpaceBackground />
       <div id="game-page" className={started ? '' : 'is-starting'}>
         <header className="title-area">
-          <h1>🌟 행성 합치기 게임</h1>
+          <h1>🌟 천체 합치기 게임</h1>
           {started && (
             <>
               <p>마우스로 위치를 정하고 클릭하면 천체가 떨어져요. 같은 천체 둘이 만나면 더 큰 천체로 변신!</p>
