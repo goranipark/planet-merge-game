@@ -887,7 +887,9 @@
   z-index: 20;
   background: rgba(4, 6, 16, 0.78);
   display: flex;
-  align-items: center;
+  /* safe center: 창이 화면보다 길면 가운데 정렬을 포기하고 위쪽부터 보여 줍니다.
+     (그냥 center 로 두면 위가 잘린 채 스크롤로도 못 올라갑니다) */
+  align-items: safe center;
   justify-content: center;
   padding: 16px;
   /* 세로가 아주 짧은 화면에서 창이 잘리지 않도록 */
