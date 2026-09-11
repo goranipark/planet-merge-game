@@ -44,6 +44,9 @@ function App() {
   // (같은 탭에서는 새로고침해도 유지되고, 탭을 닫으면 초기화 — config.js RESET_ON_TAB_CLOSE)
   const seenStagesRef = useRef(loadSeenStages())
   const maxStageRef = useRef(-1)
+  // 마지막 단계(해왕성)를 처음 만들었을 때만 완성 안내 + 거리 보기 화면을 띄웁니다.
+  // 두 번째부터도 띄우면, 해왕성 둘을 합치려는 학생의 흐름이 매번 끊깁니다.
+  const finishShownRef = useRef(false)
   const playerRef = useRef(null)
   const roomRef = useRef(null)
 
@@ -126,6 +129,7 @@ function App() {
   useEffect(() => {
     scoreRef.current = 0
     maxStageRef.current = -1
+    finishShownRef.current = false
     setScore(0)
     setIsGameOver(false)
     setCardQueue([])
@@ -154,8 +158,9 @@ function App() {
       onMerge: (stage) => {
         maxStageRef.current = Math.max(maxStageRef.current, stage)
         setMaxStage((prev) => Math.max(prev, stage))
-        // 마지막 단계(태양 / 해왕성 궤도)를 만들면 완성
-        if (stage === mode.stages.length - 1) {
+        // 마지막 단계(태양 / 해왕성 궤도)를 처음 만들면 완성
+        if (stage === mode.stages.length - 1 && !finishShownRef.current) {
+          finishShownRef.current = true
           setBanner(`🎉 ${mode.stages[stage].name}까지 만들었어요! 완성!`)
           // 완성하면 실제 거리 화면으로 마무리 (거리 순서 게임만)
           if (mode.hasDistanceRuler) {

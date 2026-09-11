@@ -68,6 +68,11 @@ function InfoCard({ mode, stage, remaining, quiz, bonus, onCorrect, onClose }) {
             {/* 오개념을 짚어 주는 문구가 있는 천체에만 표시 (예: 해왕성의 궤도 vs 크기) */}
             {def.sizeNote && <p className="info-warn">⚠️ {def.sizeNote}</p>}
 
+            {/* 마지막 단계 카드에만: 둘을 합치면 사라진다는 것을 미리 알려 줍니다 */}
+            {card.finalNote && stage === mode.stages.length - 1 && (
+              <p className="info-final">🌟 {card.finalNote}</p>
+            )}
+
             <button type="button" className="btn-primary" onClick={onClose}>
               알겠어요!
             </button>

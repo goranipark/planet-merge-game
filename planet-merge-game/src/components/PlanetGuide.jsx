@@ -41,6 +41,9 @@ function PlanetGuide({ mode, maxStage = -1, onShowRuler }) {
         })}
       </ol>
 
+      {/* 마지막 단계의 특별 규칙 (예: 해왕성 2개 → 태양계 완성) */}
+      {mode.guide.footer && <p className="guide-footer">{mode.guide.footer}</p>}
+
       {/* 거리 순서 게임에서만: 수업 정리용으로 언제든 실제 거리를 볼 수 있게 */}
       {mode.hasDistanceRuler && onShowRuler && (
         <button type="button" className="guide-ruler-btn" onClick={onShowRuler}>

@@ -39,6 +39,8 @@ export const distanceMode = {
   // 더 합칠 데가 없는 가장 큰 궤도가 바닥에 쌓여 병을 막는 것을 막아 줍니다.
   popFinalPair: true,
   finalPairScore: MODE_TUNING.distance.finalPairScore,
+  // 사라진 자리에 뜨는 글자 (engine.js 가 병 안에 직접 그립니다)
+  finalPairText: `🌟 태양계 완성! +${MODE_TUNING.distance.finalPairScore}`,
 
   // 궤도 고리 그림 (orbitSprites.js)
   getSprite: getOrbitSprite,
@@ -79,12 +81,24 @@ export const distanceMode = {
       { label: '태양까지 거리', value: def.distanceText },
       { label: '지구와 비교', value: compareToEarth(def.au) },
     ],
+    // 마지막 궤도(해왕성) 카드에만 붙는 안내.
+    // 해왕성 둘이 사라지는 것을 미리 알려 주지 않으면 학생이 없어졌다고 오해합니다.
+    finalNote:
+      '여기가 마지막 궤도예요. 해왕성 궤도 2개를 합치면 태양계 하나 완성! ' +
+      `둘 다 사라지면서 +${MODE_TUNING.distance.finalPairScore}점을 받아요.`,
   },
 
   // 화면 왼쪽 순서표 패널 문구
   guide: {
     title: '거리 순서표',
     hint: '같은 궤도 2개 → 한 단계 바깥 궤도',
+    // 순서표 맨 아래 — 마지막 궤도의 규칙을 처음부터 보이게 둡니다
+    footer: (
+      <>
+        <strong>해왕성 2개</strong>를 합치면 태양계 완성!{' '}
+        <em>+{MODE_TUNING.distance.finalPairScore}점</em>
+      </>
+    ),
     note: (
       <>
         <strong>태양에서 가까운 순서</strong>예요. 공의 크기는{' '}

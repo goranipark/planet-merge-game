@@ -265,6 +265,53 @@ export function createGame(
     particles.push({ x, y, ring: true, life: 1, size: radius, color })
   }
 
+  // 사라진 자리에 떠오르는 글자 ("태양계 완성! +500")
+  // 화면 위쪽 알림 띠는 학생이 보고 있는 병 바닥에서 멀어, 여기서 한 번 더 알려 줍니다.
+  const floatTexts = []
+
+  function spawnFloatText(x, y, text, color) {
+    floatTexts.push({ x, y, text, color, life: 1 })
+  }
+
+  function drawFloatTexts(ctx) {
+    for (let i = floatTexts.length - 1; i >= 0; i--) {
+      const t = floatTexts[i]
+      t.life -= 0.011 // 약 1.5초
+      if (t.life <= 0) {
+        floatTexts.splice(i, 1)
+        continue
+      }
+      // 이름표와 같은 방식: 화면에 찍히는 크기를 고정하고 축소 비율만큼 되돌립니다
+      let size = 22 / cssScale
+      const 떠오름 = (1 - t.life) * 60 // 위로 천천히 올라감
+      // 처음엔 살짝 커졌다가 원래 크기로 (눈에 띄게)
+      const pop = t.life > 0.85 ? 1 + (t.life - 0.85) * 2 : 1
+      ctx.save()
+      ctx.globalAlpha = Math.min(1, t.life * 2.5)
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.lineJoin = 'round'
+
+      // 병보다 글자가 길면 줄여서 잘리지 않게 합니다 (크롬북처럼 병이 좁은 화면)
+      const 최대폭 = width * 0.92
+      ctx.font = `bold ${size}px system-ui, sans-serif`
+      const 잰폭 = ctx.measureText(t.text).width
+      if (잰폭 > 최대폭) size *= 최대폭 / 잰폭
+      ctx.font = `bold ${size * pop}px system-ui, sans-serif`
+
+      // 병 끝에서 합쳐져도 글자가 밖으로 나가지 않도록 좌우를 붙잡아 둡니다
+      const 반폭 = ctx.measureText(t.text).width / 2
+      const x = Math.min(Math.max(t.x, 반폭 + 4), width - 반폭 - 4)
+
+      ctx.lineWidth = Math.max(6, size * 0.6)
+      ctx.strokeStyle = 'rgba(10, 8, 22, 0.95)'
+      ctx.strokeText(t.text, x, t.y - 떠오름)
+      ctx.fillStyle = t.color
+      ctx.fillText(t.text, x, t.y - 떠오름)
+      ctx.restore()
+    }
+  }
+
   function drawParticles(ctx) {
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i]
@@ -336,6 +383,13 @@ export function createGame(
           )
           World.remove(engine.world, b)
         }
+        // 사라진 바로 그 자리에 큰 글자를 띄웁니다 (없어진 게 아니라 보상이라는 표시)
+        spawnFloatText(
+          (bodyA.position.x + bodyB.position.x) / 2,
+          (bodyA.position.y + bodyB.position.y) / 2,
+          mode.finalPairText ?? '완성!',
+          '#ffd54f'
+        )
         onSfx?.('merge', { stage: lastStage })
         onScoreChange?.(mode.finalPairScore ?? 0)
         onFinalPair?.(mode.finalPairScore ?? 0)
@@ -537,6 +591,7 @@ export function createGame(
     drawAimPreview(ctx)
     drawLabels(ctx)
     drawParticles(ctx)
+    drawFloatTexts(ctx)
   }
 
   Events.on(render, 'afterRender', handleAfterRender)
